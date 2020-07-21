@@ -1,0 +1,31 @@
+<div *ngIf="loading">
+    loading
+</div>
+<div *ngIf="!loading">
+    <h2>Дошки</h2>
+    <select (change)="onChangeBoard($event.target.value)">
+        <option></option>
+        <option *ngFor="let board of boards" [value]="board.id">
+            {{board.name}}
+        </option>
+    </select>
+</div>
+
+<div *ngIf="loadingSprint">
+    loadingSprint
+</div>
+<div *ngIf="!loadingSprint">
+    <h2>Спрінти</h2>
+    <div class="main">        
+        <div class="main__item" *ngFor="let sprint of sprints">
+            <input (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
+                id="{{sprint.name}}">
+            <label for="{{sprint.name}}">
+                {{sprint.name}}
+            </label>
+        </div>
+    </div>
+    <div>
+        <button (click)="find()">Поиск</button>
+    </div>
+</div>

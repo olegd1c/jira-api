@@ -1,0 +1,28 @@
+<div *ngIf="loading">
+    loading
+</div>
+<div *ngIf="!loading">
+    <table border="1">
+        <caption>Таблиця загрузки розробника</caption>
+        <tr>
+            <th>Спрінт</th>
+            <th>Задача</th>
+            <th>Розробник</th>
+            <th>Поінти розробника</th>
+            <th>Тестувальник</th>
+            <th>Поінти тестувальника</th>
+            <th>Спрінти</th>
+        </tr>
+
+        <tr *ngFor="let item of tasks">
+            <td>{{item.sprintName}}</td>
+            <td>{{item.key}}</td>
+            <td>{{item.devName}}</td>
+            <td>{{item.pointDev}}</td>
+            <td>{{item.testName}}</td>
+            <td>{{item.pointTest}}</td>
+            <td>{{item.sprintsName}}</td>
+        </tr>
+
+    </table>
+</div>

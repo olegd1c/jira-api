@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": [],
+    "paths": {
+      "@app/*": [
+        "app/*"
+      ],      
+      "@environments/*": [
+        "environments/*"
+      ],
+      "@services/*": [
+        "app/services/*"
+      ],
+      "@components/*": [
+        "app/components/*"
+      ],            
+      "@test/*": [
+        "../e2e/*"
+      ],
+      "@app-pl/*": [
+        "plugin/app/*"
+      ],
+      "@components-pl/*": [
+        "plugin/app/components/*"
+      ]      
+    },
+  },
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}

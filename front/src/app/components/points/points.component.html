@@ -1,0 +1,78 @@
+<app-filters (search)="onSearch($event)"></app-filters>
+
+<div *ngIf="loading">
+    loading
+</div>
+<div *ngIf="!loading">
+
+    <div *ngIf="points">
+        <h3>Таблиця загрузки розробника</h3>
+
+        <div>
+            <table border="1">
+                <tr>
+                    <th>Розробник</th>
+                    <th>Кількість спрінтів</th>
+                    <th>Кількість задач</th>
+                    <th>Кількість поінтів</th>
+                    <th>Середня Кількість задач</th>
+                    <th>Середня Кількість поінтів</th>
+                </tr>
+
+                <tr *ngFor="let itemA of points.sprintsAvg.dev">
+                    <td>{{itemA.name}}</td>
+                    <td>{{itemA.countSprint}}</td>
+                    <td>{{itemA.countAll}}</td>
+                    <td>{{itemA.pointAll}}</td>
+                    <td>{{itemA.countAvg}}</td>
+                    <td>{{itemA.pointAvg}}</td>
+                </tr>
+
+            </table>
+        </div>
+        <h3>Таблиця загрузки тестувальників</h3>
+        <div>
+            <table border="1">
+                <tr>
+                    <th>Тестувальник</th>
+                    <th>Кількість спрінтів</th>
+                    <th>Кількість задач</th>
+                    <th>Кількість поінтів</th>
+                    <th>Середня Кількість задач</th>
+                    <th>Середня Кількість поінтів</th>
+                </tr>
+
+                <tr *ngFor="let itemA of points.sprintsAvg.test">
+                    <td>{{itemA.name}}</td>
+                    <td>{{itemA.countSprint}}</td>
+                    <td>{{itemA.countAll}}</td>
+                    <td>{{itemA.pointAll}}</td>
+                    <td>{{itemA.countAvg}}</td>
+                    <td>{{itemA.pointAvg}}</td>
+                </tr>
+
+            </table>
+        </div>        
+        <br>
+        <button (click)="showDetails = !showDetails">{{(showDetails) ? 'Заховати деталі' : 'Показати деталі'}}</button>
+        <div *ngIf="showDetails">
+            <div *ngFor="let item of points.sprints">
+                <h4>Спрінт: {{item.name}}</h4>
+
+                <table border="1">
+                    <tr>
+                        <th>Розробник</th>
+                        <th>Поінти</th>
+                        <th>Кількість задач</th>
+                    </tr>
+
+                    <tr *ngFor="let itemV of item.values">
+                        <td>{{itemV.name}}</td>
+                        <td>{{itemV.point}}</td>
+                        <td>{{itemV.count}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
