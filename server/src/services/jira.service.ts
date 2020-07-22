@@ -91,7 +91,7 @@ export class JiraService {
                     return -1
                 }
             });
-            return items;
+            return {meta:{isLast: result.isLast, start: result.startAt, pageSize: result.maxResults}, values: items};
         })
             .catch(function (err) {
                 console.error(err);

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 //import { HttpService } from '@app/services/http.service';
 import { BaseService } from './base.service';
 import { HttpService } from './http.service';
+import { SprintSearch } from '../models/search.modetl';
 
 @Injectable()
 export class TaskService extends BaseService {
@@ -28,9 +29,16 @@ export class TaskService extends BaseService {
         return this.service._get();
     }
     
-    public getSprints(boardId: number): Promise<any> {
-        //this.setFields(param);
-        this.service.setUrl(`sprints?boardId=${boardId}`);
+    public getSprints(params: SprintSearch): Promise<any> {
+
+        let url = `sprints?boardId=${params.boardId}`;
+        if (params.start) {
+            url = url + `&start=${params.start}`;
+        }
+        if (params.pageSize) {
+            url = url + `&pageSize=${params.pageSize}`;
+        }
+        this.service.setUrl(url);
         return this.service._get();
     }
 

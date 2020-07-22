@@ -24,6 +24,9 @@
                 {{sprint.name}}
             </label>
         </div>
+        <div *ngIf="!metaSearch.isLast">
+            <button (click)="addSprints()">еще</button>
+        </div>
     </div>
     <div>
         <button (click)="find()">Поиск</button>

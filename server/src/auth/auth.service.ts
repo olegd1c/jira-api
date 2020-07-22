@@ -39,12 +39,10 @@ export class AuthService {
        if (!result) {
            throw new UnauthorizedException('Invalid credentials');
        }
-        
-
 
        const payload: JwtPayload = { username, password };
        const accessToken = this.jwtService.sign(payload, {secret: '1234'});
 
-       return {accessToken: accessToken, username: username};
+       return {accessToken: accessToken, username: result.displayName};
     }
 }

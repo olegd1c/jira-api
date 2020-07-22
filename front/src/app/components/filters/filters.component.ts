@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { FormControl } from '@angular/forms';
+import { SprintSearch } from 'src/app/models/search.modetl';
 
 @Component({
     selector: 'app-filters',
@@ -17,6 +18,11 @@ export class FiltersComponent implements OnInit {
     selectedSprints: number[] = [];
     boardSelect: FormControl = new FormControl('');
     private boarId;
+    metaSearch = {
+        isLast: true, 
+        start: 0, 
+        pageSize: 50
+    };
 
     constructor(private taskService: TaskService) { }
 
@@ -33,11 +39,19 @@ export class FiltersComponent implements OnInit {
         });
     }
 
-    private getSprints(boardId) {
+    private getSprints(params: SprintSearch, add = false) {
         this.loadingSprint = true;
-        this.taskService.getSprints(boardId).then(result => {
+        this.taskService.getSprints(params).then(result => {
             //console.log(result);
-            this.sprints = result;
+            this.metaSearch = result.meta;
+            if (add) {
+                result.values.map(item => {
+                    this.sprints.push(item);
+                });
+            } else {
+                this.sprints = result.values;
+            }
+            
             this.loadingSprint = false;
         });
     }
@@ -57,6 +71,12 @@ export class FiltersComponent implements OnInit {
 
     onChangeBoard(id) {
         this.boarId = id;
-        this.getSprints(id);
+        this.getSprints({boardId: id});
+        this.sprints = [];
+        this.search.emit({boardId: this.boarId, sprints: []});
+    }
+
+    addSprints() {
+        this.getSprints({boardId: this.boarId, start: this.metaSearch.start+this.metaSearch.pageSize, pageSize: this.metaSearch.pageSize}, true);
     }
 }
