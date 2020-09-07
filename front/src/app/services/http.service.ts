@@ -4,9 +4,9 @@ import {of as observableOf, Observable, Subject} from 'rxjs';
 import {map, catchError} from 'rxjs/operators';
 import {HttpClient, HttpHandler, HttpParams, HttpHeaders, HttpResponse} from '@angular/common/http';
 
-import {Params} from '../params';
+import {Params} from '@app/params';
 import {Injectable} from '@angular/core';
-import {LocalStorageHelper} from '../helpers/localStorage.helper';
+import {LocalStorageHelper} from '@app/helpers/localStorage.helper';
 
 interface Options {
     headers?: HttpHeaders;

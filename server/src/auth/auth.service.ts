@@ -3,7 +3,7 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt/jwt-payload.interface';
 
-import * as config from '../config/config';
+import * as config from '@config/config';
 import { JiraService } from 'src/services/jira.service';
 
 const jwtConfig = config.JWT;

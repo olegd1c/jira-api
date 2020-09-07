@@ -2,8 +2,8 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, ExtractJwt } from 'passport-jwt'
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtPayload } from './jwt-payload.interface';
-import * as config from '../../config/config';
-import { User } from '../../models/user.model';
+import * as config from '@config/config';
+import { User } from '@models/user.model';
 import { JiraService } from 'src/services/jira.service';
 
 const jwtConfig = config.JWT;

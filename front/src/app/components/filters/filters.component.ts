@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { TaskService } from '../../services/task.service';
+import { TaskService } from '@services/task.service';
 import { FormControl } from '@angular/forms';
-import { SprintSearch } from 'src/app/models/search.modetl';
+import { SprintSearch } from 'src/app/models/search.model';
 
 @Component({
     selector: 'app-filters',
@@ -73,7 +73,7 @@ export class FiltersComponent implements OnInit {
         this.boarId = id;
         this.getSprints({boardId: id});
         this.sprints = [];
-        this.search.emit({boardId: this.boarId, sprints: []});
+        this.search.emit(null);
     }
 
     addSprints() {

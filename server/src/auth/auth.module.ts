@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { JwtStrategy } from './jwt/jwt.strategy';
-import * as config from '../config/config';
+import * as config from '@config/config';
 import { JiraService } from 'src/services/jira.service';
 
 //const jwtConfig = config.get('jwt');

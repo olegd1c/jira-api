@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 //import { BaseService } from '@app/services/base.service';
 //import { HttpService } from '@app/services/http.service';
-import { BaseService } from './base.service';
-import { HttpService } from './http.service';
-import { SprintSearch } from '../models/search.modetl';
+import { BaseService } from '@services/base.service';
+import { HttpService } from '@services/http.service';
+import { SprintSearch } from '@models/search.model';
 
 @Injectable()
 export class TaskService extends BaseService {

@@ -5,8 +5,8 @@ import { map } from 'rxjs/operators';
 
 import { BaseService } from './base.service';
 import { HttpService } from './http.service';
-import { LocalStorageHelper } from '../helpers/localStorage.helper';
-import { User } from '../models/user.model';
+import { LocalStorageHelper } from '@app/helpers/localStorage.helper';
+import { User } from '@models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService extends BaseService {

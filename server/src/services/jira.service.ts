@@ -1,22 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as JiraApi from "jira-client"
-import { Task, Analytics, Assignee, PointAvg, SprintPoint } from '../models/task.model';
-import { User } from 'src/models/user.model';
+import { Task, Analytics, Assignee, PointAvg, SprintPoint } from '@models/task.model';
+import { User } from '@models/user.model';
 
-import * as config from '../config/config';
+import * as config from '@config/config';
+import { FieldTask } from '@models/field.model';
 const apiConfig = config.API;
 let  jiraApi: JiraApi;
-
-/*
-export const jiraApi: JiraApi = new JiraApi({
-    protocol: "https",
-    host: "sd.local",
-    username: "dikhtyaruk",
-    password: "F677dH@@",
-    apiVersion: "2",
-    strictSSL: false
-});
-*/
 
 @Injectable()
 export class JiraService {
@@ -125,9 +115,9 @@ export class JiraService {
         const tasks: Task[] = await this.getAllTasks(query);
         //console.log('getPointByDev', tasks.length);
         
-        var { temp, devAvg, testAvg }: { temp, devAvg, testAvg} = this.parsePointTasks(tasks);
+        var { temp, devAvg, testAvg, reviewerAvg }: { temp, devAvg, testAvg, reviewerAvg} = this.parsePointTasks(tasks);
 
-        const result: Analytics = {sprints: temp, sprintsAvg: {dev: devAvg, test: testAvg}};
+        const result: Analytics = {sprints: temp, sprintsAvg: {dev: devAvg, test: testAvg, reviewer: reviewerAvg}};
 
         return result;
     }
@@ -137,56 +127,69 @@ export class JiraService {
         const temp: SprintPoint[] = [];
         const devAvg: PointAvg[] = [];
         const testAvg: PointAvg[] = [];
+        const reviewerAvg: PointAvg[] = [];
 
-        tasks.forEach((item: Task) => {
-            let insertSprint = false;            
-            let fItem: SprintPoint;
-            let fItemDev: Assignee;
-            let findex = temp.findIndex(t => t.name == item.sprintName
-            );
-            //console.log('findex', findex);
-            if (findex >= 0) {
-                fItem = temp[findex];
-            }
-            else {
-                fItem = { name: item.sprintName, values: [] };
-                insertSprint = true;
-            }
-            
-            const devs = [{name: 'devName', point: 'pointDev', type: 0}, {name: 'testName', point: 'pointTest', type: 1}];
-            devs.map(d => {
-                let insertDev = false;
-                let fIndexDev = fItem.values.findIndex(t => t.name == item[d.name]);
-
-                if (fIndexDev >= 0) {
-                    fItemDev = fItem.values[fIndexDev];
+        if (tasks) {
+            tasks.forEach((item: Task) => {
+                let insertSprint = false;            
+                let fItem: SprintPoint;
+                let fItemDev: Assignee;
+                let findex = temp.findIndex(t => t.name == item.sprintName
+                );
+                //console.log('findex', findex);
+                if (findex >= 0) {
+                    fItem = temp[findex];
                 }
                 else {
-                    fItemDev = { name: item[d.name], count: 0, point: 0, type: d.type };
-                    insertDev = true;
+                    fItem = { name: item.sprintName, values: [] };
+                    insertSprint = true;
                 }
-    
-                //console.log('fItemDev.point', fItemDev.point, 'item.pointDev', item.pointDev);
-                fItemDev.count = fItemDev.count + 1;
-                fItemDev.point = fItemDev.point + ((item[d.point]) ? item[d.point] : 0);
-                //console.log('fItemDev.pointEnd', fItemDev.point);
-    
-                if (insertDev) {
-                    fItem.values.push(fItemDev);
+                
+                const devs = [
+                    {name: 'devName', point: 'pointDev', type: 0},
+                    {name: 'testName', point: 'pointTest', type: 1},
+                    //{name: 'reviewers', point: 'pointDev', type: 2},
+                ];
+                devs.map(d => {
+                    parseAssingPoint(fItem, fItemDev, item, d);
+                    /*
+                    let insertDev = false;
+                    let fIndexDev = fItem.values.findIndex(t => t.name == item[d.name]);
+
+                    if (fIndexDev >= 0) {
+                        fItemDev = fItem.values[fIndexDev];
+                    }
+                    else {
+                        fItemDev = { name: item[d.name], count: 0, point: 0, type: d.type };
+                        insertDev = true;
+                    }
+        
+                    //console.log('fItemDev.point', fItemDev.point, 'item.pointDev', item.pointDev);
+                    fItemDev.count = fItemDev.count + 1;
+                    fItemDev.point = fItemDev.point + ((item[d.point]) ? item[d.point] : 0);
+                    //console.log('fItemDev.pointEnd', fItemDev.point);
+        
+                    if (insertDev) {
+                        fItem.values.push(fItemDev);
+                    }
+                    */
+                });
+                const d = {name: 'devName', point: 'pointDev', type: 2};
+                item.reviewers.forEach(r => {
+                    parseAssingPoint(fItem, fItemDev, item, d, r);
+                });
+
+                if (insertSprint) {
+                    temp.push(fItem);
                 }
             });
-
-            if (insertSprint) {
-                temp.push(fItem);
-            }
-        });
-
+        }
         temp.forEach((itemS: SprintPoint) => {
 
             itemS.values.forEach((item: Assignee) => {
                 let insertDev = false;
                 let fItem: PointAvg;
-                let tempAvg = (item.type === 0) ? devAvg : testAvg;
+                let tempAvg = (item.type === 0) ? devAvg : ((item.type === 2) ? reviewerAvg : testAvg);
                 let fIndex = tempAvg.findIndex(t => t.name == item.name);
                 //console.log('findex', findex);
                 if (fIndex >= 0) {
@@ -207,8 +210,10 @@ export class JiraService {
 
             });
         });
-
+        
         [devAvg, testAvg].map(avg => {
+            countAvg(avg, true);
+            /*
             const total: PointAvg = {name: 'Разом', countSprint: 0, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0};
             avg.map(item => {
                 item.pointAvg = (item.pointAll / item.countSprint).toFixed(1);
@@ -221,9 +226,10 @@ export class JiraService {
             });
 
             avg.push(total);
+            */
         });
-     
-        return { temp, devAvg, testAvg };
+        countAvg(reviewerAvg);
+        return { temp, devAvg, testAvg, reviewerAvg };
     }
 
     async getAllTasks(query): Promise<any> {
@@ -290,7 +296,13 @@ export class JiraService {
                 //console.log('parseTask: ' + JSON.stringify(item));
                 //console.log('/n');
                 const data = await this.getIssue(item.key);
-                result = Object.assign({ id: item.id, key: item.key, summary: item.summary }, data);
+                const reviewers = [];
+                if (item.fields[FieldTask.reviewer]) {
+                    item.fields[FieldTask.reviewer].forEach(element => {
+                        reviewers.push(element.key);
+                    });
+                }
+                result = Object.assign({ id: item.id, key: item.key, summary: item.summary, reviewers: reviewers }, data);
                 items.push(result);
                 //console.log('data: ' + JSON.stringify(data));
                 i++;
@@ -343,5 +355,49 @@ function parseStringName(string: string) {
     //console.log('indexEnd', indexEnd);
     const result = string.substr(indexStart + 5, indexEnd - 5);
     return result;
+}
+
+function parseAssingPoint(fItem, fItemDev, item, d, nameUser = '') {
+    let insertDev = false;
+    if (!nameUser) {
+        nameUser = item[d.name];
+    }
+    let fIndexDev = fItem.values.findIndex(t => t.name == nameUser && t.type == d.type);
+
+    if (fIndexDev >= 0) {
+        fItemDev = fItem.values[fIndexDev];
+    }
+    else {
+        fItemDev = { name: nameUser, count: 0, point: 0, type: d.type };
+        insertDev = true;
+    }
+
+    //console.log('fItemDev.point', fItemDev.point, 'item.pointDev', item.pointDev);
+    fItemDev.count = fItemDev.count + 1;
+    fItemDev.point = fItemDev.point + ((item[d.point]) ? item[d.point] : 0);
+    //console.log('fItemDev.pointEnd', fItemDev.point);
+
+    if (insertDev) {
+        fItem.values.push(fItemDev);
+    }
+}
+
+function countAvg(avg, useTotal = false) {
+    const total: PointAvg = {name: 'Разом', countSprint: 0, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0};
+    avg.map(item => {
+        item.pointAvg = (item.pointAll / item.countSprint).toFixed(1);
+        item.countAvg = (item.countAll / item.countSprint).toFixed(1);
+
+        if (useTotal) {        
+            total.countAll = total.countAll + item.countAll;
+            total.pointAll = total.pointAll + item.pointAll;
+            total.countAvg = (+total.countAvg) + (+item.countAvg);
+            total.pointAvg = (+total.pointAvg) + (+item.pointAvg);
+        }
+    });
+
+    if (useTotal) {
+        avg.push(total);
+    }
 }
 

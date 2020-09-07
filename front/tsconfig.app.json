@@ -5,26 +5,23 @@
     "types": [],
     "paths": {
       "@app/*": [
-        "app/*"
+        "src/app/*"
       ],      
       "@environments/*": [
         "environments/*"
       ],
       "@services/*": [
-        "app/services/*"
+        "src/app/services/*"
       ],
       "@components/*": [
-        "app/components/*"
-      ],            
+        "src/app/components/*"
+      ],
+      "@models/*": [
+        "src/app/models/*"
+      ],
       "@test/*": [
         "../e2e/*"
-      ],
-      "@app-pl/*": [
-        "plugin/app/*"
-      ],
-      "@components-pl/*": [
-        "plugin/app/components/*"
-      ]      
+      ],     
     },
   },
   "files": [

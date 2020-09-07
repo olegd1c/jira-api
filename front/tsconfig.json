@@ -15,29 +15,6 @@
       "es2018",
       "dom"
     ],
-    "paths": {
-      "@app/*": [
-        "app/*"
-      ],      
-      "@environments/*": [
-        "environments/*"
-      ],
-      "@services/*": [
-        "app/services/*"
-      ],
-      "@components/*": [
-        "app/components/*"
-      ],            
-      "@test/*": [
-        "../e2e/*"
-      ],
-      "@app-pl/*": [
-        "plugin/app/*"
-      ],
-      "@components-pl/*": [
-        "plugin/app/components/*"
-      ]      
-    },
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

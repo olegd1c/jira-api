@@ -1,4 +1,4 @@
-import { HttpService } from './http.service';
+import { HttpService } from '@services/http.service';
 import { HttpHeaders } from '@angular/common/http';
 
 export class BaseService {

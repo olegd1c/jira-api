@@ -1,30 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { TaskService } from '../../services/task.service';
-
-interface Dev {
-  name: string;
-  count: number;
-  point: number;
-}
-
-interface DevAvg {
-  name: string;
-  countSprint: number;
-  countAll: number;
-  pointAll: number;
-  countAvg: number;
-  pointAvg: number;
-}
-
-interface SprintPoint {
-  name: string;
-  values: Dev[];
-}
-
-interface Analytics {
-  sprints: SprintPoint[],
-  sprintsAvg: {dev: DevAvg[], test: DevAvg[]}
-}
+import { TaskService } from '@services/task.service';
+import { Analytics } from '@models/point.model';
 
 @Component({
   selector: 'app-points',
@@ -37,6 +13,7 @@ export class PointsComponent implements OnInit {
   points: Analytics;
   loading = false;
   showDetails = false;
+  sprints;
 
   constructor(private taskService: TaskService) { }
 
@@ -54,7 +31,12 @@ export class PointsComponent implements OnInit {
   }
 
   onSearch($event) {
-    let params = {boardId: $event.boardId, sprints: $event.sprints};
-    this.getPoints(params);
+    if ($event) {
+      this.sprints = $event.sprints;
+      let params = {boardId: $event.boardId, sprints: $event.sprints};
+      this.getPoints(params);
+    } else {
+      this.points = null;
+    }
   }
 }

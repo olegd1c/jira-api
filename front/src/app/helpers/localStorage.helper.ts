@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import { Params }  from '../params';
+import { Params }  from '@app/params';
 
 @Injectable()
 export class LocalStorageHelper {

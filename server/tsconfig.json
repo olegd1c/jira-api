@@ -9,7 +9,24 @@
     "sourceMap": true,
     "outDir": "./dist/server",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@app/*": [
+        "src/*"
+      ],
+      "@services/*": [
+        "src/services/*"
+      ],
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],      
+      "@test/*": [
+        "../e2e/*"
+      ],     
+    },
   },
   "include": [
     "./src/**/*"
