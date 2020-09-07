@@ -20,6 +20,9 @@
       "@models/*": [
         "src/models/*"
       ],
+      "@shared_models/*": [
+        "src/shared/models/*"
+      ],
       "@config/*": [
         "src/config/*"
       ],      

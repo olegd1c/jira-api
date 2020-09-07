@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as JiraApi from "jira-client"
-import { Task, Analytics, Assignee, PointAvg, SprintPoint } from '@models/task.model';
+import { Task, Analytics, Assignee, PointAvg, SprintPoint } from '@shared_models/task.model';
 import { User } from '@models/user.model';
 
 import * as config from '@config/config';
@@ -31,16 +31,16 @@ export class JiraService {
                     //return JSON.stringify(issue);
                     const dev = issue.fields['assignee'];
                     const devName = (dev) ? dev.name : '';
-                    const fieldPointDev = issue.fields['customfield_10204'];
+                    const fieldPointDev = issue.fields[FieldTask.pointDev];
                     const pointDev = (fieldPointDev) ? +fieldPointDev['value'] : 0;
-                    const fieldTest = issue.fields['customfield_10401'];
-                    const fieldSprints = issue.fields['customfield_10107'];
+                    const fieldTest = issue.fields[FieldTask.tester];
+                    const fieldSprints = issue.fields[FieldTask.sprints];
                     let sprintName, sprintsName;
                     [sprintName, sprintsName] = getSprintName(fieldSprints);
                     //const sprintName = this.getNameSprint(fieldSprints);
 
                     const testName = (fieldTest) ? fieldTest[0].name : '';
-                    const fieldPointTest = issue.fields['customfield_10205'];
+                    const fieldPointTest = issue.fields[FieldTask.pointTest];
                     const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : 0;
                     //console.log('fieldSprints: '+ JSON.stringify(issue.fields));
                     result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName };

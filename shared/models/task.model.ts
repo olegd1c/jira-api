@@ -7,6 +7,7 @@ export interface Task {
     pointTest: number;
     sprintName: string;
     sprintsName: string;
+    reviewers: [];
 }
 
 export interface Analytics {
@@ -14,14 +15,21 @@ export interface Analytics {
     sprintsAvg: {
         dev: PointAvg[];
         test: PointAvg[];
+        reviewer: PointAvg[];
     }
+}
+
+export enum TypeAssignee {
+    dev = 0,
+    test = 1,
+    reviewer = 2
 }
 
 export interface Assignee {
     name: string;
     count: number;
     point: number;
-    type: number; //0 - dev, 1 - test
+    type: number; //0 - dev, 1 - test, 2 - reviewer
 }
 
 export interface PointAvg {
