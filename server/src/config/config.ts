@@ -1,9 +1,3 @@
-export const API = {
-    protocol: "https",
-    host: "sd.local",
-    apiVersion: "2",
-    strictSSL: false
-};
 
 export const JWT = {
     secret: "1234",

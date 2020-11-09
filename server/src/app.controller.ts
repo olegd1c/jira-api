@@ -1,15 +1,16 @@
 import { Controller, Get, Param, Req, Query, Post, Body, UseGuards } from '@nestjs/common';
-import { AppService } from './services/app.service';
 import { JiraService } from './services/jira.service';
 import { GetUser } from './auth/user/get-user.decorator';
 import { User } from './models/user.model';
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
+import { TelegramBotService } from './services/telegram-bot.service';
+import { Observable } from 'rxjs';
 
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
     private readonly jiraService: JiraService,
+    private readonly telegramBotService: TelegramBotService
     ) {}
 
   @Get()
@@ -64,6 +65,22 @@ export class AppController {
     @Param('key') key: string
   ): Promise<any> {
     return this.jiraService.getIssue(key);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('task-announcement/:key')
+  getTaskAnnouncement(
+    @Param('key') key: string
+  ): Promise<any> {
+    return this.jiraService.getIssueAnnouncement(key);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('send-announcement')
+  sendAnnouncement(
+    @Body() data: any
+  ): Observable<any> {
+    return this.telegramBotService.sendMessage(data);
   }
 
   @Post('/auth2')

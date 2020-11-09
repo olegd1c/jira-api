@@ -22,7 +22,7 @@ import { environment } from 'src/environments/environment';
 @Injectable()
 export class HttpService extends HttpClient {
 
-    public url:string;
+    private url:string;
     private entity:any;
     public headers: HttpHeaders;
     private defaultHeaders: HttpHeaders;
@@ -61,9 +61,9 @@ export class HttpService extends HttpClient {
         }
     }
 
-    setUrl(url: string, sendFile = false) {
+    setUrl(url: string, sendFile = false, useDef = true) {
         this.setHeaders(sendFile);
-        this.url = this.param.apiUrl + url;
+        this.url = (useDef ? this.param.apiUrl : '') + url;
         this.addParameters();
     }
 

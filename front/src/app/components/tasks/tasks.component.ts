@@ -16,7 +16,7 @@ export class TasksComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.taskService.getTask({}).then(result => {
+    this.taskService.getTasks({}).then(result => {
       this.tasks = result;
       this.loading = false;
     });

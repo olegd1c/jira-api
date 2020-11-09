@@ -13,8 +13,7 @@ export class TaskService extends BaseService {
         super(service);
     }
 
-    public getTask(params: any): Promise<any> {
-        //this.setFields(param);
+    public getTasks(params: any): Promise<any> {
         this.service.setUrl(`${this.url}?rapidViewId=472&sprintsId=1639&sprintsId=1673`);
         return this.service._get();
     }
@@ -46,4 +45,15 @@ export class TaskService extends BaseService {
         this.service.setUrl(`boards?name=market`);
         return this.service._get();
     } 
+
+    public getTaskAnnouncement(params: {number: string}): Promise<any> {
+        this.service.setUrl(`task-announcement/${params.number}`);
+        return this.service._get();
+    }    
+
+    public sendAnnouncement(data: {message: string}): Promise<any> {
+        this.service.setEntity(data);
+        this.service.setUrl(`send-announcement`);
+        return this.service._post();
+    }
 }

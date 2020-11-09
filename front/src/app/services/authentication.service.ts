@@ -55,6 +55,6 @@ export class AuthenticationService extends BaseService {
       result = dataParse.username;
     }
     
-    return {username: result};
+    return result ? {username: result} : null;
   }
 }

@@ -14,6 +14,7 @@ import { AlertService } from './services/alert.service';
 import { AuthenticationService } from './services/authentication.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AlertComponent } from './components/alert/alert.component';
+import { AnnouncementsComponent } from './components/announcements/announcements.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { AlertComponent } from './components/alert/alert.component';
     PointsComponent,
     FiltersComponent,
     LoginComponent,
-    AlertComponent
+    AlertComponent,
+    AnnouncementsComponent
   ],
   imports: [
     BrowserModule,

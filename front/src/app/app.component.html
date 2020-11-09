@@ -1,20 +1,200 @@
-<nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="currentUser">
+<!--nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="currentUser">
     <div class="navbar-nav">
         <a class="nav-item nav-link" routerLink="/">Головна</a>
-        <a class="nav-item nav-link" (click)="logout()">Вийти</a>
-        | Привіт, {{currentUser.username}}
+        <a class="nav-item nav-link" href="#" (click)="logout()">Вийти</a>
+        <span class="nav-item nav-link">Привіт, {{currentUser.username}}</span>
+    </div>
+</nav-->
+
+<div id="wrapper" class="active">
+    <!-- Sidebar -->
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul id="sidebar_menu" class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a id="menu-toggle" href="#">
+                    Головна<span id="main_icon" class="glyphicon glyphicon-align-justify"></span>
+                </a>
+            </li>
+        </ul>
+        <ul class="sidebar-nav" id="sidebar">
+            <li>
+                <a class="sidebar-brand" [routerLink]="['/points']" routerLinkActive="router-link-active">
+                    Поінти <span class="sub_icon glyphicon glyphicon-link"></span>
+                </a>
+            </li>
+            <li>
+                <a class="sidebar-brand" [routerLink]="['/tasks']" routerLinkActive="router-link-active" >
+                    Задачі <span class="sub_icon glyphicon glyphicon-link"></span>
+                </a>
+                <a class="sidebar-brand" [routerLink]="['/announcements']" routerLinkActive="router-link-active" >
+                    Анонс виливки<span class="sub_icon glyphicon glyphicon-link"></span>
+                </a>
+            </li>
+            
+            <!--ul class="sidebar-nav" id="sidebar">
+                <li><a class="sidebar-brand">link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+                <li><a class="sidebar-brand">link2<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+            </ul-->
+            <!--li><a class="sidebar-brand">Consulta<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+            <li><a class="sidebar-brand">Relatorio<span class="sub_icon glyphicon glyphicon-link"></span></a></li-->
+        </ul>
     </div>
 
-</nav>
+    <!-- Page content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <!--a class="navbar-brand" href="#">Navbar</a-->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <!--li class="nav-item active">
+                        <a class="nav-link" routerLink="/">Головна</a>
+                    </li-->
+                </ul>
+                <ul class="navbar-nav">
+                    <ng-container *ngIf="currentUser; else tmpLogin">
+                        <li class="nav-item">
+                            <span class="nav-item nav-link">Привіт, {{currentUser.username}}</span>
+                        </li>
+                        <li class="nav-item">
+                            <span class="glyphicon glyphicon-log-in"></span>
+                            <a class="nav-item nav-link" href="#" (click)="logout()">Вийти</a>
+                        </li>
+                    </ng-container>
+                    <ng-template #tmpLogin>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Login</a>
+                        </li>
+                    </ng-template>
+                </ul>
+            </div>
+        </nav>
+        <!-- Keep all page content within the page-content inset div! -->
+        <div class="page-content inset">
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- main app container -->
+                    <div class="jumbotron">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <alert></alert>
+                                    <router-outlet></router-outlet>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-<!-- main app container -->
-<div class="jumbotron">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-6 offset-sm-3">
-                <alert></alert>
-                <router-outlet></router-outlet>
+                    <div *ngIf="false">
+                        <p class="well lead">Cadastro de Cliente</p>
+                        <div class="container">
+                            <div class="row">
+                                <!-- div da esquerda -->
+                                <!-- Text input CNPJ e Razao Social-->
+                                <div class="col-sm-8 contact-form">
+                                    <!-- div da direita -->
+                                    <form id="contact" method="post" class="form" role="form">
+                                        <div class="row">
+                                            <div class="col-xs-6 col-md-3 form-group">
+                                                <input class="form-control" id="inputCNPJ" name="CNPJ"
+                                                    placeholder="CNPJ" type="text" required autofocus />
+                                            </div>
+                                            <div class="col-xs-4 col-md-9 form-group">
+                                                <input class="form-control" id="inputrazaosocial" name="razaocosial"
+                                                    placeholder="Razão Social" type="text" />
+                                            </div>
+                                        </div> <!-- fim row -->
+                                        <!-- Text input endereco-->
+                                        <div class="col-xs-4 col-md-12 form-group">
+                                            <div class="controls">
+                                                <input class="form-control" id="inputendereco" name="endereco"
+                                                    placeholder="Endereço" type="text">
+                                            </div>
+                                        </div>
+                                        <!--fim control-group-->
+                                        <br>
+                                        <!--pulando uma linha -->
+                                        <!-- Text input cidade e estado-->
+                                        <div class="row">
+                                            <div class="col-xs-6 col-md-9 form-group">
+                                                <input class="form-control" id="inputcidade" name="cidade"
+                                                    placeholder="Cidade" type="text" />
+                                            </div>
+                                            <div class="col-xs-4 col-md-3 form-group">
+                                                <select class="form-control" id="selectbasic" name="selectestado">
+                                                    <option>Selecione</option>
+                                                    <option>AC</option>
+                                                    <option>AL</option>
+                                                    <option>AP</option>
+                                                    <option>AM</option>
+                                                    <option>BA</option>
+                                                    <option>CE</option>
+                                                    <option>DF</option>
+                                                    <option>ES</option>
+                                                    <option>GO</option>
+                                                    <option>MA</option>
+                                                    <option>MT</option>
+                                                    <option>MS</option>
+                                                    <option>MG</option>
+                                                    <option>PA</option>
+                                                    <option>PB</option>
+                                                    <option>PR</option>
+                                                    <option>PE</option>
+                                                    <option>PI</option>
+                                                    <option>RJ</option>
+                                                    <option>RN</option>
+                                                    <option>RS</option>
+                                                    <option>RO</option>
+                                                    <option>RR</option>
+                                                    <option>SC</option>
+                                                    <option>SP</option>
+                                                    <option>SE</option>
+                                                    <option>TO</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3 form-group">
+                                                <input class="form-control" id="inputtelefone" name="telefone"
+                                                    placeholder="Telefone" type="text" />
+                                            </div>
+                                            <div class="col-xs-4 col-md-3 form-group">
+                                                <input class="form-control" id="inputcontato" name="contato"
+                                                    placeholder="Contato" type="text" />
+                                            </div>
+                                            <div class="col-xs-4 col-md-6 form-group">
+                                                <input class="form-control" id="inputemail" name="email"
+                                                    placeholder="E-mail" type="text" />
+                                            </div>
+                                        </div>
+                                        <!--fim Text input cidade e estado-->
+                                        <div class="col-xs-4 col-md-12 form-group">
+                                            <div class="controls">
+                                                <textarea class="form-control" id="message" name="message"
+                                                    placeholder="Message" rows="5"></textarea>
+                                            </div>
+                                        </div>
+                                        <br />
+
+                                        <div class="row">
+                                            <div class="col-xs-12 col-md-12 form-group">
+                                                <button class="btn btn-primary pull-right" type="submit">Salvar</button>
+                                                <button class="btn btn-primary pull-right" type="submit">Limpar</button>
+                                                <!--<button class="btn btn-primary pull-right" type="submit">Enviar</button>-->
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div> <!-- fim div da direita -->
+                            </div> <!-- fim div da esquerda -->
+                        </div>
+                        <p class="well lead">An Experiment using the sidebar (<a
+                                href="http://animeshmanglik.name">animeshmanglik.name</a>)</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
 </div>

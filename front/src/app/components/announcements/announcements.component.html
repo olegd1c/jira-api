@@ -1,0 +1,89 @@
+<p class="well lead">Анонс виливки задач</p>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-8 contact-form">
+            <form [formGroup]="searchForm" (ngSubmit)="search()" class="form" role="form">
+                <div class="row">
+                    <div class="col-xs-9 col-md-9 form-group">
+                        <input [attr.disabled]="loading ? '' : null" formControlName="number" class="form-control"
+                            placeholder="Номер задачі" type="text" required autofocus />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12 col-md-12 form-group">
+                        <button [disabled]="!searchForm.valid" class="btn btn-primary pull-right" type="submit">Пошук</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+</div>
+
+<div>
+    <form [formGroup]="announcementForm" (ngSubmit)="announcement()" class="form" role="form">
+        <div class="row">
+            <div class='col-sm-6'>
+                <div class="form-group">
+                    <div class='input-group date' id='datetimepicker2'>
+                        <input type='datetime-local' class="form-control" formControlName="date" />
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table table-striped w-auto" formArrayName="tasks">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col" class="w-50">Номер задачі</th>
+                        <th scope="col">Опис</th>
+                        <th scope="col">Розробник</th>
+                        <th scope="col">Тестувальник</th>
+                        <th scope="col">Посилання</th>
+                        <th scope="col">Підтвердження</th>
+                        <th scope="col">Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let task of tasksForm.controls; let i=index">
+                        <tr [formGroupName]="i">
+                            <th scope="row">{{ i + 1 }}</th>
+                            <td>{{task.get('key').value}}</td>
+                            <td>{{task.get('summary').value}}</td>
+                            <td>{{task.get('devName').value}}</td>
+                            <td>{{task.get('testName').value}}</td>
+                            <td>{{task.get('link').value}}</td>
+                            <td>
+                                <select formControlName="confirm">
+                                    <option></option>
+                                    <option *ngFor="let itemC of confirmList" [value] = "itemC">
+                                        {{itemC}}
+                                    </option>
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" (click)="deleteTask(i)" class="btn btn-delete">Видалити</button>
+                            </td>
+                        </tr>
+                    </ng-container>
+
+                </tbody>
+            </table>
+
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12 form-group">
+                <button [disabled]="!announcementForm.valid" class="btn btn-primary pull-right" type="submit">Відправити
+                    анонс</button>
+            </div>
+        </div>
+    </form>
+
+    <textarea disabled cols="50" rows="15" [value]="announcementText"></textarea>
+</div>

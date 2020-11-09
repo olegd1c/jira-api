@@ -1,15 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import * as JiraApi from "jira-client"
-import { Task, Analytics, Assignee, PointAvg, SprintPoint } from '@shared_models/task.model';
+import { ConfigService } from '@nestjs/config';
+import { Task, Analytics, Assignee, PointAvg, TaskAnnouncement } from '@shared_models/task.model';
 import { User } from '@models/user.model';
 
-import * as config from '@config/config';
 import { FieldTask } from '@models/field.model';
-const apiConfig = config.API;
+import { SprintPoint } from '@app/models/task.model';
+
+let apiConfig = null;
 let  jiraApi: JiraApi;
 
 @Injectable()
 export class JiraService {
+
+    constructor(private configService: ConfigService) {
+        apiConfig = {
+            protocol: this.configService.get('JIRA_API_PROTOCOL'),
+            host: this.configService.get('JIRA_API_HOST'),
+            apiVersion: this.configService.get('JIRA_API_VERSION'),
+            strictSSL: false
+        };
+    }
 
     async getIssue(key: string): Promise<any> {
 
@@ -21,13 +32,13 @@ export class JiraService {
                 //console.log('issue.fields: ' + JSON.stringify(issue.fields));
 
                 Object.keys(issue.fields).forEach(item => {
-                    //fields.push(item + ': ' + issue.fields[item]);
+                    fields.push(item + ': ' + issue.fields[item]);
                 }
                 );
                 //customfield_10107
                 let result = {};
                 if (issue) {
-                    //console.log(JSON.stringify(issue));
+                    console.log(JSON.stringify(issue));
                     //return JSON.stringify(issue);
                     const dev = issue.fields['assignee'];
                     const devName = (dev) ? dev.name : '';
@@ -325,6 +336,51 @@ export class JiraService {
             });
 
         return jiraApi.getCurrentUser();
+    }
+
+    async getIssueAnnouncement(key: string): Promise<any> {
+
+        return jiraApi.findIssue(key)
+            .then(function (issue) {
+                let fields = [];
+
+                //console.log('Status: ' + issue.fields.status.name);
+                //console.log('issue.fields: ' + JSON.stringify(issue.fields));
+
+                //Object.keys(issue.fields).forEach(item => {
+                    //fields.push(item + ': ' + issue.fields[item]);
+                //}
+                //);
+                //customfield_10107
+                let result: TaskAnnouncement = null;
+                if (issue) {
+                    //console.log(JSON.stringify(issue));
+                    //result = JSON.stringify(issue);
+                    
+                    const dev = issue.fields['assignee'];
+                    const devName = (dev) ? dev.displayName : '';
+
+                    const fieldTest = issue.fields[FieldTask.tester];
+                    const summary = issue.fields['summary'];
+                    const key = issue['key'];
+                    const link = `${apiConfig.protocol}://${apiConfig.host}/browse/${key}`;
+
+                    const testName = (fieldTest) ? fieldTest[0].displayName : '';
+
+                    //console.log('fieldSprints: '+ JSON.stringify(issue.fields));
+                    
+                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key};
+                } else {
+                    console.log('не найден: ' + key);
+                }
+
+                return result;
+
+            })
+            .catch(function (err) {
+                console.error(err);
+            });
+
     }
 
 }

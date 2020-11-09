@@ -45,3 +45,11 @@ export interface SprintPoint {
     name: string;
     values: Assignee[];
 }
+
+export interface TaskAnnouncement {
+    devName: string;
+    testName: string;
+    summary: string;
+    link: string;
+    key: string;
+}

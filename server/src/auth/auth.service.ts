@@ -3,10 +3,12 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt/jwt-payload.interface';
 
-import * as config from '@config/config';
+//import * as config from '@config/config';
 import { JiraService } from 'src/services/jira.service';
+import { ConfigService } from '@nestjs/config';
 
-const jwtConfig = config.JWT;
+//const jwtConfig = config.JWT;
+const configService = new ConfigService();
 
 @Injectable()
 export class AuthService {
@@ -41,7 +43,7 @@ export class AuthService {
        }
 
        const payload: JwtPayload = { username, password };
-       const accessToken = this.jwtService.sign(payload, {secret: '1234'});
+       const accessToken = this.jwtService.sign(payload, {secret: configService.get('JWT_SECRET')});
 
        return {accessToken: accessToken, username: result.displayName};
     }

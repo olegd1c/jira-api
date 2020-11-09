@@ -20,15 +20,15 @@ export class LoginComponent implements OnInit {
         private authenticationService: AuthenticationService,
         private alertService: AlertService
     ) {
-      /*  
-      // redirect to home if already logged in
-        if (this.authenticationService.currentUserValue) {
-            this.router.navigate(['/']);
-        }
-        */
     }
 
     ngOnInit() {
+        this.authenticationService.currentUser.subscribe(x => {
+            if (x) {
+                this.router.navigate(['/points']);
+            }
+        });
+
         this.loginForm = this.formBuilder.group({
             username: ['', Validators.required],
             password: ['', Validators.required]
@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
     // convenience getter for easy access to form fields
     get f() { return this.loginForm.controls; }
 
-    onSubmit() {
+    login() {
         this.submitted = true;
 
         // reset alerts on submit
@@ -57,12 +57,12 @@ export class LoginComponent implements OnInit {
             //.pipe(first())
             .then(
                 data => {
-                  if (data) {
-                    this.router.navigate([this.returnUrl]);
-                  } else {
-                    this.alertService.error('Помилка авторизації');
-                    this.loading = false;
-                  }
+                    if (data) {
+                        this.router.navigate([this.returnUrl]);
+                    } else {
+                        this.alertService.error('Помилка авторизації');
+                        this.loading = false;
+                    }
                 },
                 error => {
                     this.alertService.error(error);

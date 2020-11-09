@@ -19,6 +19,9 @@
       "@models/*": [
         "src/app/models/*"
       ],
+      "@shared_models/*": [
+        "../shared/models/*"
+      ],
       "@test/*": [
         "../e2e/*"
       ],     
