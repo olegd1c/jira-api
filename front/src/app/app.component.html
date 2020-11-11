@@ -18,21 +18,21 @@
                 </a>
             </li>
         </ul>
-        <ul class="sidebar-nav" id="sidebar">
+        <ul class="sidebar-nav" id="sidebar" *ngIf="currentUser">
             <li>
-                <a class="sidebar-brand" [routerLink]="['/points']" routerLinkActive="router-link-active">
+                <a class="sidebar-brand" *hasPermission="[permissions.view]" [routerLink]="['/points']" routerLinkActive="router-link-active">
                     Поінти <span class="sub_icon glyphicon glyphicon-link"></span>
                 </a>
             </li>
             <li>
-                <a class="sidebar-brand" [routerLink]="['/tasks']" routerLinkActive="router-link-active" >
+                <a class="sidebar-brand" *hasPermission="[permissions.view]" [routerLink]="['/tasks']" routerLinkActive="router-link-active" >
                     Задачі <span class="sub_icon glyphicon glyphicon-link"></span>
                 </a>
-                <a class="sidebar-brand" [routerLink]="['/announcements']" routerLinkActive="router-link-active" >
+                <a class="sidebar-brand" *hasPermission="[permissions.notify]" [routerLink]="['/announcements']" routerLinkActive="router-link-active" >
                     Анонс виливки<span class="sub_icon glyphicon glyphicon-link"></span>
                 </a>
             </li>
-            
+
             <!--ul class="sidebar-nav" id="sidebar">
                 <li><a class="sidebar-brand">link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
                 <li><a class="sidebar-brand">link2<span class="sub_icon glyphicon glyphicon-link"></span></a></li>

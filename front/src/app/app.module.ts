@@ -15,6 +15,8 @@ import { AuthenticationService } from './services/authentication.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AlertComponent } from './components/alert/alert.component';
 import { AnnouncementsComponent } from './components/announcements/announcements.component';
+import { HasPermissionDirective } from "@app/directive/has-permission.directive";
+import {AuthGuard} from "@app/guards/auth.guard";
 
 @NgModule({
   declarations: [
@@ -24,7 +26,8 @@ import { AnnouncementsComponent } from './components/announcements/announcements
     FiltersComponent,
     LoginComponent,
     AlertComponent,
-    AnnouncementsComponent
+    AnnouncementsComponent,
+    HasPermissionDirective
   ],
   imports: [
     BrowserModule,
@@ -33,7 +36,7 @@ import { AnnouncementsComponent } from './components/announcements/announcements
     FormsModule,
     ReactiveFormsModule
   ],
-  providers: [HttpService, TaskService, AlertService, AuthenticationService],
+  providers: [HttpService, TaskService, AlertService, AuthenticationService, AuthGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

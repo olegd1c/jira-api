@@ -2,18 +2,15 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, ExtractJwt } from 'passport-jwt'
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtPayload } from './jwt-payload.interface';
-//import * as config from '@config/config';
 import { User } from '@models/user.model';
 import { JiraService } from 'src/services/jira.service';
 import { ConfigService } from '@nestjs/config';
 
-//const jwtConfig = config.JWT;
-const configService = new ConfigService();
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        private jiraService: JiraService
+        private jiraService: JiraService,
+        private configService: ConfigService
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,8 +19,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: JwtPayload): Promise<User> {
-        const { username, password } = payload;
-        let user = { username, password };
+        const { username, password, permissions } = payload;
+        let user = { username, password, permissions };
 
         let result;
         try {
@@ -38,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             user = null;
             throw new UnauthorizedException('');
         }
-
+        user = Object.assign(user, {displayName: result.displayName})
         return user;
     }
 }

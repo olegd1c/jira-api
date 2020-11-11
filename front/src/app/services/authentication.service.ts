@@ -13,7 +13,7 @@ export class AuthenticationService extends BaseService {
   public url = 'auth';
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
-  
+
   constructor(protected service: HttpService) {
     super(service);
     this.currentUserSubject = new BehaviorSubject<User>(this.getCurrentUser());
@@ -28,7 +28,7 @@ export class AuthenticationService extends BaseService {
         let result;
         if (res && res.accessToken) {
           this.writeAuthData(res);
-          this.currentUserSubject.next({username: res.username});
+          this.currentUserSubject.next({username: res.username, permissions: res.permissions});
           result = true;
         }
 
@@ -48,13 +48,35 @@ export class AuthenticationService extends BaseService {
   }
 
   private getCurrentUser() {
-    let result = '';
+    let result = null;
     let data = localStorage.getItem('authData');
     if (data) {
       const dataParse = JSON.parse(data);
-      result = dataParse.username;
+      result = {username: dataParse.username, permissions: dataParse.permissions};
     }
-    
-    return result ? {username: result} : null;
+
+    return result;
+  }
+
+  public static getAccessToken(): string {
+    let authData: any = LocalStorageHelper.getlocalStorage('authData');
+    if (authData) {
+      authData = JSON.parse(authData);
+      if (authData.accessToken) {
+        return authData.accessToken;
+      }
+    }
+    return '';
+  }
+
+  public static getPermissions(): string[] {
+    let authData: any = LocalStorageHelper.getlocalStorage('authData');
+    if (authData) {
+      authData = JSON.parse(authData);
+      if (authData.permissions) {
+        return authData.permissions;
+      }
+    }
+    return [];
   }
 }

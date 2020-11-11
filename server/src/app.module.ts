@@ -11,7 +11,12 @@ ConfigModule.forRoot({
 });
 
 @Module({
-  imports: [AuthModule, ConfigModule.forRoot(), HttpModule],
+  imports: [
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
+    HttpModule],
   controllers: [AppController],
   providers: [AppService, JiraService, ConfigService, TelegramBotService],
 })

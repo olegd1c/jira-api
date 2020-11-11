@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '@services/authentication.service';
 import { User } from '@models/user.model';
+import { Permissions } from '@shared_models/permission.enum';
 
 @Component({
   selector: 'app-root',
@@ -11,12 +12,13 @@ import { User } from '@models/user.model';
 export class AppComponent implements OnInit{
   title = 'jira-front';
   currentUser: User;
+  permissions = Permissions;
 
   constructor(
     private router: Router,
     private authenticationService: AuthenticationService
 ) {
-    
+
 }
 
 logout() {
@@ -25,6 +27,8 @@ logout() {
 }
 
   ngOnInit() {
-    this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
+    this.authenticationService.currentUser.subscribe(x => {
+       this.currentUser = x;
+    });
   }
 }

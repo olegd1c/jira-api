@@ -99,7 +99,7 @@ export class AnnouncementsComponent implements OnInit {
   prepareText() {
     const data = this.announcementForm.value;
     const date = data.date ? new Date(data.date).toLocaleString() : '';
-    this.announcementText = 'TEST' + "\n\n" +
+    this.announcementText =
       'Планируемая дата выливки ' + date + "\n\n";
     data.tasks.map(item => {
       this.announcementText = this.announcementText +

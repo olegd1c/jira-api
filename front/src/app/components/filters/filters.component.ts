@@ -33,7 +33,6 @@ export class FiltersComponent implements OnInit {
     private getBoards() {
         this.loading = true;
         this.taskService.getBoards().then(result => {
-            //console.log(result);
             this.boards = result;
             this.loading = false;
         });
@@ -42,14 +41,15 @@ export class FiltersComponent implements OnInit {
     private getSprints(params: SprintSearch, add = false) {
         this.loadingSprint = true;
         this.taskService.getSprints(params).then(result => {
-            //console.log(result);
-            this.metaSearch = result.meta;
-            if (add) {
-                result.values.map(item => {
-                    this.sprints.push(item);
-                });
-            } else {
-                this.sprints = result.values;
+            if (result) {
+                this.metaSearch = result.meta;
+                if (add) {
+                    result.values.map(item => {
+                        this.sprints.push(item);
+                    });
+                } else {
+                    this.sprints = result.values;
+                }
             }
             
             this.loadingSprint = false;

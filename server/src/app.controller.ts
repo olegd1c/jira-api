@@ -1,10 +1,13 @@
-import { Controller, Get, Param, Req, Query, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, Query, Post, Body, UseGuards, SetMetadata } from '@nestjs/common';
 import { JiraService } from './services/jira.service';
 import { GetUser } from './auth/user/get-user.decorator';
 import { User } from './models/user.model';
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 import { TelegramBotService } from './services/telegram-bot.service';
 import { Observable } from 'rxjs';
+import { Permissions } from './shared/models/permission.enum';
+
+export const MetaPermissions = (...permissions: string[]) => SetMetadata('permissions', permissions);
 
 @Controller()
 export class AppController {
@@ -26,12 +29,14 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Get('boards')
+  @MetaPermissions(Permissions.view)
   getBoards(
     @Query() query
   ): Promise<any> {
     return this.jiraService.getAllBoards(query);
   }
 
+  @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
   @Get('sprints')
   getSprints(
@@ -41,6 +46,7 @@ export class AppController {
     return this.jiraService.getAllSprints(query, user);
   }
 
+  @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
   @Get('tasks')
   getTasks(
@@ -50,6 +56,7 @@ export class AppController {
     return this.jiraService.getAllTasks(query);
   }
 
+  @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
   @Get('pointsByDev')
   getPointsByDev(
@@ -59,6 +66,7 @@ export class AppController {
     return this.jiraService.getPointByDev(query);
   }
 
+  @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
   @Get('task/:key')
   getTask(
@@ -67,6 +75,7 @@ export class AppController {
     return this.jiraService.getIssue(key);
   }
 
+  @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
   @Get('task-announcement/:key')
   getTaskAnnouncement(
@@ -75,17 +84,15 @@ export class AppController {
     return this.jiraService.getIssueAnnouncement(key);
   }
 
+  @MetaPermissions(Permissions.notify)
   @UseGuards(JwtAuthGuard)
   @Post('send-announcement')
+  @SetMetadata('permissions', [Permissions.notify])
   sendAnnouncement(
-    @Body() data: any
+    @Body() data: any,
+    @GetUser() user: User,
   ): Observable<any> {
-    return this.telegramBotService.sendMessage(data);
-  }
-
-  @Post('/auth2')
-  signIn2(@Body() authCredo: any): string {
-      return 'ok';
+    return this.telegramBotService.sendMessage(data, user);
   }
 
 }
