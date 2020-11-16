@@ -35,8 +35,8 @@ export class AuthService {
        }
 
        let permissions = [Permissions.view];
-       const notif_users: string[] = [configService.get('NOTIFICATION_USERS')];
-       if (notif_users && notif_users.length) {
+       const notif_users: string[] = configService.get('NOTIFICATION_USERS').split(',');
+        if (notif_users && notif_users.length) {
         notif_users.map(item => {
             if (item === username) {
                 permissions.push(Permissions.notify);

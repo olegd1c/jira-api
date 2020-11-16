@@ -104,9 +104,9 @@ export class AnnouncementsComponent implements OnInit {
     data.tasks.map(item => {
       this.announcementText = this.announcementText +
       item.link + ' ' +
-      item.summary + "\n\n" +
-      'Исполнитель: ' + item.devName + "\n\n" +
-      'Тестировщик: ' + item.testName + "\n\n" +
+      item.summary + "\n" +
+      'Исполнитель: ' + item.devName + "\n" +
+      'Тестировщик: ' + item.testName + "\n" +
       'Подтверждение бизнеса: ' + item.confirm + "\n\n";
     });
   }

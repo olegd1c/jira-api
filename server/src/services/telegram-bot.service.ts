@@ -12,7 +12,7 @@ export class TelegramBotService {
 
   }
 
-  sendMessage(data: {message: string}, user: User): Observable<any> {
+  async sendMessage(data: {message: string}, user: User): Promise<any> {
     const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
     const chatId = this.configService.get('TELEGRAM_CHAT_ID');
     const botId = this.configService.get('TELEGRAM_BOT_ID');

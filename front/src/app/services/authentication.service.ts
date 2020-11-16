@@ -1,7 +1,5 @@
 ﻿import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { BaseService } from './base.service';
 import { HttpService } from './http.service';
@@ -78,5 +76,16 @@ export class AuthenticationService extends BaseService {
       }
     }
     return [];
+  }
+
+  public static getAuthLogin(): string {
+    const authData = LocalStorageHelper.getlocalStorage('authData');
+    if (authData) {
+      const data = JSON.parse(authData);
+      if (data.username) {
+        return data.username;
+      }
+    }
+    return '';
   }
 }

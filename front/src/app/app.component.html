@@ -62,12 +62,12 @@
                         </li>
                         <li class="nav-item">
                             <span class="glyphicon glyphicon-log-in"></span>
-                            <a class="nav-item nav-link" href="#" (click)="logout()">Вийти</a>
+                            <a class="nav-item nav-link" routerLink="/" (click)="logout()">Вийти</a>
                         </li>
                     </ng-container>
                     <ng-template #tmpLogin>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Login</a>
+                            <a class="nav-link" routerLink="/auth">Login</a>
                         </li>
                     </ng-template>
                 </ul>

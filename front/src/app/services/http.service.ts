@@ -3,6 +3,7 @@ import {of as observableOf, Observable, Subject} from 'rxjs';
 
 import {map, catchError} from 'rxjs/operators';
 import {HttpClient, HttpHandler, HttpParams, HttpHeaders, HttpResponse} from '@angular/common/http';
+import { Router } from "@angular/router";
 
 import {Params} from '@app/params';
 import {Injectable} from '@angular/core';
@@ -29,9 +30,8 @@ export class HttpService extends HttpClient {
     private param:Params = new Params;
     public fields:Array<string> = [];
     public inProgressObserv: Subject<boolean> = new Subject();
-    private readonly MARKET_EXCEPTION_CODE = 1020;
 
-    constructor(handler: HttpHandler) {
+    constructor(handler: HttpHandler, private router: Router) {
         super(handler);
     }
 
@@ -143,30 +143,33 @@ export class HttpService extends HttpClient {
     }
 
     protected handleError(error: any) {
-        console.error(error);
+      if (error.status && error.status === 401) {
+        this.router.navigateByUrl('/login?exit=1');
+      }
+      console.error(error);
     }
 
     private decodeErrorMessage(err: any) {
         let errList = {};
         if (err.details) {
             if (typeof err.details === 'string') {
-               
+
             } else {
                 errList['paragraphs'] = [];
                 for (const i in err.details) {
                     if (err.details[i]) {
                         if (err.details[i] instanceof Array) {
                             err.details[i].forEach(element => {
-                                
+
                             });
                         } else {
-                            
+
                         }
                     }
                 }
             }
         } else {
-            
+
         }
         return errList;
     }

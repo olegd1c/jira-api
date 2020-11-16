@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
 
 import { AlertService } from '@services/alert.service';
 import { AuthenticationService } from '@services/authentication.service';
@@ -28,6 +27,11 @@ export class LoginComponent implements OnInit {
                 this.router.navigate(['/points']);
             }
         });
+
+        const exit = this.route.snapshot.queryParamMap.get('exit');
+        if(exit && exit == '1' && AuthenticationService.getAuthLogin()) {
+          this.authenticationService.logout();
+        }
 
         this.loginForm = this.formBuilder.group({
             username: ['', Validators.required],

@@ -91,7 +91,7 @@ export class AppController {
   sendAnnouncement(
     @Body() data: any,
     @GetUser() user: User,
-  ): Observable<any> {
+  ): Promise<any> {
     return this.telegramBotService.sendMessage(data, user);
   }
 
