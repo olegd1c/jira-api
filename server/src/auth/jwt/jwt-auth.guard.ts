@@ -47,7 +47,6 @@ import {
         throw new HttpException('access denided', HttpStatus.FORBIDDEN);
       }
 
-      //let r = this.request.push(user);
       return user;
     }
   }

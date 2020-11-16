@@ -27,7 +27,7 @@ export class HttpService extends HttpClient {
     private entity:any;
     public headers: HttpHeaders;
     private defaultHeaders: HttpHeaders;
-    private param:Params = new Params;
+    private param = Params;
     public fields:Array<string> = [];
     public inProgressObserv: Subject<boolean> = new Subject();
 

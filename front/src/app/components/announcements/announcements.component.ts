@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
+import {Params} from "@app/params";
 
 @Component({
   selector: 'app-announcements',
@@ -13,7 +14,7 @@ export class AnnouncementsComponent implements OnInit {
   searchForm: FormGroup;
   announcementForm: FormGroup;
   announcementText = '';
-  confirmList = [];
+  confirmList = Params.confirmList;
 
   get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray };
 

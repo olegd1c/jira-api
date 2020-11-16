@@ -7,6 +7,9 @@
 # Only exists if Bazel was run
 /bazel-out
 
+# files project
+src/app/params.ts
+
 # dependencies
 /node_modules
 
