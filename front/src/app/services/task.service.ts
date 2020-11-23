@@ -13,9 +13,14 @@ export class TaskService extends BaseService {
         super(service);
     }
 
-    public getTasks(params: any): Promise<any> {
-        this.service.setUrl(`${this.url}?rapidViewId=472&sprintsId=1639&sprintsId=1673`);
-        return this.service._get();
+    public getTasks(params: {boardId: number, sprints: number[]}): Promise<any> {
+      let queryParams = 'boardId='+params.boardId;
+      params.sprints.map(item => {
+        queryParams = queryParams + '&sprintsId='+item;
+      });
+
+      this.service.setUrl(`${this.url}?${queryParams}`);
+      return this.service._get();
     }
 
     public getPoints(params: {boardId: number, sprints: number[]}): Promise<any> {
@@ -27,7 +32,7 @@ export class TaskService extends BaseService {
         this.service.setUrl(`pointsByDev?${queryParams}`);
         return this.service._get();
     }
-    
+
     public getSprints(params: SprintSearch): Promise<any> {
 
         let url = `sprints?boardId=${params.boardId}`;
@@ -44,16 +49,22 @@ export class TaskService extends BaseService {
     public getBoards(): Promise<any> {
         this.service.setUrl(`boards?name=market`);
         return this.service._get();
-    } 
+    }
 
     public getTaskAnnouncement(params: {number: string}): Promise<any> {
         this.service.setUrl(`task-announcement/${params.number}`);
         return this.service._get();
-    }    
+    }
 
     public sendAnnouncement(data: {message: string}): Promise<any> {
         this.service.setEntity(data);
         this.service.setUrl(`send-announcement`);
+        return this.service._post();
+    }
+
+    public updateStoryPoints(data: {boardId: string, keys?: string[]}): Promise<any> {
+        this.service.setEntity(data);
+        this.service.setUrl(`update-story-points`);
         return this.service._post();
     }
 }

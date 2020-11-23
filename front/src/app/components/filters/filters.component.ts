@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import {Component, OnInit, Output, EventEmitter, Input} from '@angular/core';
 import { TaskService } from '@services/task.service';
 import { FormControl } from '@angular/forms';
 import { SprintSearch } from 'src/app/models/search.model';
@@ -9,6 +9,7 @@ import { SprintSearch } from 'src/app/models/search.model';
     styleUrls: ['./filters.component.scss']
 })
 export class FiltersComponent implements OnInit {
+    @Input() reload: boolean;
     @Output() search: EventEmitter<any> = new EventEmitter();
 
     loading = false;
@@ -19,8 +20,8 @@ export class FiltersComponent implements OnInit {
     boardSelect: FormControl = new FormControl('');
     private boarId;
     metaSearch = {
-        isLast: true, 
-        start: 0, 
+        isLast: true,
+        start: 0,
         pageSize: 50
     };
 
@@ -28,6 +29,12 @@ export class FiltersComponent implements OnInit {
 
     ngOnInit(): void {
         this.getBoards();
+    }
+
+    ngOnChanges(): void {
+        if (this.reload) {
+          this.find();
+        }
     }
 
     private getBoards() {
@@ -51,7 +58,7 @@ export class FiltersComponent implements OnInit {
                     this.sprints = result.values;
                 }
             }
-            
+
             this.loadingSprint = false;
         });
     }

@@ -28,18 +28,13 @@ export class JiraService {
             .then(function (issue) {
                 let fields = [];
 
-                //console.log('Status: ' + issue.fields.status.name);
-                //console.log('issue.fields: ' + JSON.stringify(issue.fields));
-
                 Object.keys(issue.fields).forEach(item => {
                     fields.push(item + ': ' + issue.fields[item]);
                 }
                 );
-                //customfield_10107
+
                 let result = {};
                 if (issue) {
-                    console.log(JSON.stringify(issue));
-                    //return JSON.stringify(issue);
                     const dev = issue.fields['assignee'];
                     const devName = (dev) ? dev.name : '';
                     const fieldPointDev = issue.fields[FieldTask.pointDev];
@@ -53,8 +48,9 @@ export class JiraService {
                     const testName = (fieldTest) ? fieldTest[0].name : '';
                     const fieldPointTest = issue.fields[FieldTask.pointTest];
                     const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : 0;
-                    //console.log('fieldSprints: '+ JSON.stringify(issue.fields));
-                    result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName };
+                    const pointStory = issue.fields[FieldTask.pointStory];
+
+                    result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName, pointStory: pointStory };
                 } else {
                     console.log('не найден: ' + key);
                 }
@@ -83,7 +79,7 @@ export class JiraService {
             let items = [];
             result.values.forEach(item => {
                 items.push({id: item.id, name: item.name});
-            })
+            });
 
             items.sort((a,b) => {
                 if (a.name > b.name) {
@@ -97,7 +93,6 @@ export class JiraService {
             .catch(function (err) {
                 console.error(err);
             });
-
     }
 
     async getAllBoards(params): Promise<any> {
@@ -108,24 +103,20 @@ export class JiraService {
 
         return jiraApi.getAllBoards(start, pageSize, null, name).then(result => {
 
-            //console.log('getAllBoards: ' + JSON.stringify(result));
-            let items = [];
-            result.values.forEach(item => {
-                items.push({id: item.id, name: item.name});
-            })
+                //console.log('getAllBoards: ' + JSON.stringify(result));
+                let items = [];
+                result.values.forEach(item => {
+                    items.push({id: item.id, name: item.name});
+                })
 
-            return items;
-        })
-            .catch(function (err) {
+                return items;
+            }).catch(function (err) {
                 console.error(err);
             });
-
     }
 
     async getPointByDev(query): Promise<any> {
         const tasks: Task[] = await this.getAllTasks(query);
-        //console.log('getPointByDev', tasks.length);
-        
         var { temp, devAvg, testAvg, reviewerAvg }: { temp, devAvg, testAvg, reviewerAvg} = this.parsePointTasks(tasks);
 
         const result: Analytics = {sprints: temp, sprintsAvg: {dev: devAvg, test: testAvg, reviewer: reviewerAvg}};
@@ -147,7 +138,6 @@ export class JiraService {
                 let fItemDev: Assignee;
                 let findex = temp.findIndex(t => t.name == item.sprintName
                 );
-                //console.log('findex', findex);
                 if (findex >= 0) {
                     fItem = temp[findex];
                 }
@@ -163,27 +153,6 @@ export class JiraService {
                 ];
                 devs.map(d => {
                     parseAssingPoint(fItem, fItemDev, item, d);
-                    /*
-                    let insertDev = false;
-                    let fIndexDev = fItem.values.findIndex(t => t.name == item[d.name]);
-
-                    if (fIndexDev >= 0) {
-                        fItemDev = fItem.values[fIndexDev];
-                    }
-                    else {
-                        fItemDev = { name: item[d.name], count: 0, point: 0, type: d.type };
-                        insertDev = true;
-                    }
-        
-                    //console.log('fItemDev.point', fItemDev.point, 'item.pointDev', item.pointDev);
-                    fItemDev.count = fItemDev.count + 1;
-                    fItemDev.point = fItemDev.point + ((item[d.point]) ? item[d.point] : 0);
-                    //console.log('fItemDev.pointEnd', fItemDev.point);
-        
-                    if (insertDev) {
-                        fItem.values.push(fItemDev);
-                    }
-                    */
                 });
                 const d = {name: 'devName', point: 'pointDev', type: 2};
                 item.reviewers.forEach(r => {
@@ -224,20 +193,6 @@ export class JiraService {
         
         [devAvg, testAvg].map(avg => {
             countAvg(avg, true);
-            /*
-            const total: PointAvg = {name: 'Разом', countSprint: 0, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0};
-            avg.map(item => {
-                item.pointAvg = (item.pointAll / item.countSprint).toFixed(1);
-                item.countAvg = (item.countAll / item.countSprint).toFixed(1);
-
-                total.countAll = total.countAll + item.countAll;
-                total.pointAll = total.pointAll + item.pointAll;
-                total.countAvg = (+total.countAvg) + (+item.countAvg);
-                total.pointAvg = (+total.pointAvg) + (+item.pointAvg);
-            });
-
-            avg.push(total);
-            */
         });
         countAvg(reviewerAvg);
         return { temp, devAvg, testAvg, reviewerAvg };
@@ -247,25 +202,36 @@ export class JiraService {
         const boardId = query.boardId;
         const sprintId = query.sprintId;
         const sprintsId = query.sprintsId;
-        //console.log('getSprintIssues query: ' + JSON.stringify(query));
-        if (sprintsId) {
-            //boardId: string, startAt: number, maxResults: number, jql: string, validateQuery: boolean, fields: string
-            let ids = ''
-            if (typeof sprintsId !== 'string' && sprintsId.length > 0) {
-                ids = sprintsId.toString();
+        const keys = query.keys;
+
+        if (sprintsId || keys) {
+
+            let sprintIds = '';
+            let keyIds = '';
+
+            if (sprintsId && typeof sprintsId !== 'string' && sprintsId.length > 0) {
+                sprintIds = sprintsId.toString();
             } else {
-                ids = sprintsId;
+                sprintIds = sprintsId;
             }
-            //console.log('ids: ' + ids);
-            //status = Done AND 
-            const jql = `type in (Task, Bug, Story) AND Sprint in (${ids}) ORDER BY Sprint ASC`;
+
+            if (keys && typeof keys !== 'string' && keys.length > 0) {
+                keyIds = keys.toString();
+            } else {
+                keyIds = keys;
+            }
+
+            let jql = '';
+            if (sprintIds) {
+                //status = Done AND             
+                jql = `type in (Task, Bug, Story) AND Sprint in (${sprintIds}) ORDER BY Sprint ASC`;
+            } else if (keyIds) {
+                jql =  `issuekey in (${keyIds})`;
+            }
             const fields = 'key';
             return jiraApi.getIssuesForBoard(boardId, 0, 1000, jql).then(async result => {
 
-                //console.log('getSprintIssues: ' + JSON.stringify(result));
-
                 const items: any[] = await this.parseTasks(result.issues);
-                //console.log('items: ' + items.length);
                 //items.sort((a,b) => (a.sprintName > b.sprintName) ? 1 : 0);
                 /*
                 items.sort(function(a, b){
@@ -284,15 +250,11 @@ export class JiraService {
                 });
         } else {
             return jiraApi.getSprintIssues(boardId, sprintId).then(async result => {
+                    const items = await this.parseTasks(result.contents.completedIssues);
 
-                //console.log('getSprintIssues: ' + JSON.stringify(result));
-
-                const items = await this.parseTasks(result.contents.completedIssues);
-
-                return items;
-            })
-                .catch(function (err) {
-                    console.error(err);
+                    return items;
+                }).catch(function (err) {
+                        console.error(err);
                 });
         }
     }
@@ -303,9 +265,6 @@ export class JiraService {
             let i = 1;
 
             await Promise.all(result.map(async (item) => {
-                //console.log('parseTasks key: ' + item.key);
-                //console.log('parseTask: ' + JSON.stringify(item));
-                //console.log('/n');
                 const data = await this.getIssue(item.key);
                 const reviewers = [];
                 if (item.fields[FieldTask.reviewer]) {
@@ -315,11 +274,8 @@ export class JiraService {
                 }
                 result = Object.assign({ id: item.id, key: item.key, summary: item.summary, reviewers: reviewers }, data);
                 items.push(result);
-                //console.log('data: ' + JSON.stringify(data));
                 i++;
             }));
-
-            //console.log('newMethod: ' + JSON.stringify(items));
             resolve(items);
         });
     }
@@ -344,19 +300,9 @@ export class JiraService {
             .then(function (issue) {
                 let fields = [];
 
-                //console.log('Status: ' + issue.fields.status.name);
-                //console.log('issue.fields: ' + JSON.stringify(issue.fields));
-
-                //Object.keys(issue.fields).forEach(item => {
-                    //fields.push(item + ': ' + issue.fields[item]);
-                //}
-                //);
-                //customfield_10107
                 let result: TaskAnnouncement = null;
                 if (issue) {
-                    //console.log(JSON.stringify(issue));
-                    //result = JSON.stringify(issue);
-                    
+
                     const dev = issue.fields['assignee'];
                     const devName = (dev) ? dev.displayName : '';
 
@@ -367,8 +313,6 @@ export class JiraService {
 
                     const testName = (fieldTest) ? fieldTest[0].displayName : '';
 
-                    //console.log('fieldSprints: '+ JSON.stringify(issue.fields));
-                    
                     result = { devName: devName, testName: testName, summary: summary, link: link, key: key};
                 } else {
                     console.log('не найден: ' + key);
@@ -383,6 +327,49 @@ export class JiraService {
 
     }
 
+    async updateStoryPoints(data: {boardId: string, keys: string[]}): Promise<any> {
+        
+        const tasks: Task[] = await this.getAllTasks(data);
+
+        await tasks.map(async data => {
+            let result = await jiraApi.findIssue(data.key)
+                .then(async function (issue) {
+                    let result = {};
+                    if (issue) {
+
+                        let fields = [];
+                        Object.keys(issue.fields).forEach(item => {
+                                fields.push(item + ': ' + issue.fields[item]);
+                            }
+                        );
+
+                        const fieldPointDev = issue.fields[FieldTask.pointDev];
+                        const pointDev = (fieldPointDev) ? +fieldPointDev['value'] : null;
+                        
+                        const fieldPointTest = issue.fields[FieldTask.pointTest];
+                        const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : null;
+                        const pointStory = issue.fields[FieldTask.pointStory];
+                        if ((pointDev || pointDev == 0) 
+                                && (pointTest || pointTest == 0) 
+                                && (pointStory != (pointTest+pointDev))
+                                ) {
+                            let fieldsUpdate = {"fields": {}};
+                            fieldsUpdate["fields"][FieldTask.pointStory] = pointDev + pointTest;
+
+                            result = await jiraApi.updateIssue(data.key, fieldsUpdate);
+                        }
+
+                    } else {
+                        console.log('не найден: ' + data.key);
+                    }
+                    return result;
+                })
+                .catch(function (err) {
+                    console.error(err);
+                });
+            });
+    }
+
 }
 
 function getSprintName(fieldSprints: string[]) {
@@ -390,9 +377,7 @@ function getSprintName(fieldSprints: string[]) {
     if (fieldSprints) {
         fieldSprints.forEach(string => {
             const result = parseStringName(string);
-            //if (!sprintName) {
-                sprintName = result;
-            //}
+            sprintName = result;
             sprintsName.push(result);
         });
 
@@ -405,10 +390,7 @@ function parseStringName(string: string) {
     const substringEnd = ',';
 
     const indexStart = string.indexOf(substring);
-    //console.log('indexStart', indexStart);
-    //console.log('indexStart', string.substr(indexStart));
     const indexEnd = string.substr(indexStart).indexOf(substringEnd);
-    //console.log('indexEnd', indexEnd);
     const result = string.substr(indexStart + 5, indexEnd - 5);
     return result;
 }
@@ -427,11 +409,8 @@ function parseAssingPoint(fItem, fItemDev, item, d, nameUser = '') {
         fItemDev = { name: nameUser, count: 0, point: 0, type: d.type };
         insertDev = true;
     }
-
-    //console.log('fItemDev.point', fItemDev.point, 'item.pointDev', item.pointDev);
     fItemDev.count = fItemDev.count + 1;
     fItemDev.point = fItemDev.point + ((item[d.point]) ? item[d.point] : 0);
-    //console.log('fItemDev.pointEnd', fItemDev.point);
 
     if (insertDev) {
         fItem.values.push(fItemDev);

@@ -5,6 +5,7 @@ export interface Task {
     pointDev: number;
     testName: string;
     pointTest: number;
+    pointStory: number;
     sprintName: string;
     sprintsName: string;
     reviewers: [];

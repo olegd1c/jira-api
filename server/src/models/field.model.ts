@@ -3,5 +3,6 @@ export enum FieldTask {
     pointDev = 'customfield_10204',
     tester = 'customfield_10401',
     sprints = 'customfield_10107',
-    pointTest = 'customfield_10205'
+    pointTest = 'customfield_10205',
+    pointStory = 'customfield_10130'
 }

@@ -1,9 +1,13 @@
+<app-filters (search)="onSearch($event)" [reload]="reloadTasks"></app-filters>
+
 <div *ngIf="loading">
     <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
-<div *ngIf="!loading">
+<div *ngIf="!loading && tasks && tasks.length">
+    <div class="my-2">
+      <button [disabled]="loadingStoryPoints" *ngIf="storySprintEmpty && storySprintEmpty.length" (click)="updateStoryPoints()">Оновити поінти задачі</button>
+    </div>
     <table border="1">
-        <caption>Таблиця загрузки розробника</caption>
         <tr>
             <th>Спрінт</th>
             <th>Задача</th>
@@ -11,6 +15,7 @@
             <th>Поінти розробника</th>
             <th>Тестувальник</th>
             <th>Поінти тестувальника</th>
+            <th>Поінти задачі</th>
             <th>Спрінти</th>
         </tr>
 
@@ -21,6 +26,7 @@
             <td>{{item.pointDev}}</td>
             <td>{{item.testName}}</td>
             <td>{{item.pointTest}}</td>
+            <td>{{item.pointStory}}</td>
             <td>{{item.sprintsName}}</td>
         </tr>
 

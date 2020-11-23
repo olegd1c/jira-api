@@ -95,4 +95,13 @@ export class AppController {
     return this.telegramBotService.sendMessage(data, user);
   }
 
+  @MetaPermissions(Permissions.notify)
+  @UseGuards(JwtAuthGuard)
+  @Post('update-story-points')
+  @SetMetadata('permissions', [Permissions.notify])
+  updateStorypoints(
+      @Body() data: {boardId: string, keys: string[]},
+  ): Promise<any> {
+    return this.jiraService.updateStoryPoints(data);
+  }
 }

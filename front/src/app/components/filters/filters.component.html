@@ -14,9 +14,9 @@
 <div *ngIf="loadingSprint">
     <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
-<div *ngIf="!loadingSprint">
+<div *ngIf="!loadingSprint && sprints && sprints.length">
     <h2>Спрінти</h2>
-    <div class="main">        
+    <div class="main">
         <div class="main__item" *ngFor="let sprint of sprints">
             <input (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
                 id="{{sprint.name}}">
