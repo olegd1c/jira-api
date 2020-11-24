@@ -49,8 +49,9 @@ export class JiraService {
                     const fieldPointTest = issue.fields[FieldTask.pointTest];
                     const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : 0;
                     const pointStory = issue.fields[FieldTask.pointStory];
+                    const link = getLinkTask(key);
 
-                    result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName, pointStory: pointStory };
+                    result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName, pointStory: pointStory, link: link };
                 } else {
                     console.log('не найден: ' + key);
                 }
@@ -309,7 +310,7 @@ export class JiraService {
                     const fieldTest = issue.fields[FieldTask.tester];
                     const summary = issue.fields['summary'];
                     const key = issue['key'];
-                    const link = `${apiConfig.protocol}://${apiConfig.host}/browse/${key}`;
+                    const link = getLinkTask(key);
 
                     const testName = (fieldTest) ? fieldTest[0].displayName : '';
 
@@ -434,5 +435,9 @@ function countAvg(avg, useTotal = false) {
     if (useTotal) {
         avg.push(total);
     }
+}
+
+function getLinkTask(key: string) {
+    return `${apiConfig.protocol}://${apiConfig.host}/browse/${key}`;
 }
 

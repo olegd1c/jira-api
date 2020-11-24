@@ -45,7 +45,6 @@
                         <th scope="col">Опис</th>
                         <th scope="col">Розробник</th>
                         <th scope="col">Тестувальник</th>
-                        <th scope="col">Посилання</th>
                         <th scope="col">Підтвердження</th>
                         <th scope="col">Дії</th>
                     </tr>
@@ -54,11 +53,10 @@
                     <ng-container *ngFor="let task of tasksForm.controls; let i=index">
                         <tr [formGroupName]="i">
                             <th scope="row">{{ i + 1 }}</th>
-                            <td>{{task.get('key').value}}</td>
+                            <td><a [href]="task.get('link').value" target="_blank" rel="noopener">{{task.get('key').value}}</a></td>
                             <td>{{task.get('summary').value}}</td>
                             <td>{{task.get('devName').value}}</td>
                             <td>{{task.get('testName').value}}</td>
-                            <td>{{task.get('link').value}}</td>
                             <td>
                                 <select formControlName="confirm">
                                     <option></option>
