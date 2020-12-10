@@ -25,7 +25,8 @@ export class TelegramBotService {
         'Content-Type': 'application/json'
     };
 
-    return this.httpService.get(apiUrl, { headers: headersRequest });
+    const result = await this.httpService.get(apiUrl, { headers: headersRequest }).toPromise();
+    return result && result.status == 200 ? true : false;
   }
 
   

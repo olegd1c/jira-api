@@ -87,6 +87,10 @@ export class AnnouncementsComponent implements OnInit {
       result => {
         if (result) {
           this.announcementForm.reset();
+
+          while (this.tasksForm.length > 0) {
+            this.tasksForm.removeAt(this.tasksForm.length - 1);
+          }
           this.announcementText = '';
         }
       });
