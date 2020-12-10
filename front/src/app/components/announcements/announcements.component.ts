@@ -82,7 +82,7 @@ export class AnnouncementsComponent implements OnInit {
     });
   }
 
-  announcement() {
+  sendAnnouncement() {
     this.taskService.sendAnnouncement({message: this.announcementText}).then(
       result => {
         if (result) {
