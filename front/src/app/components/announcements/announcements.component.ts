@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
-import {Params} from "@app/params";
+import { Params } from "@app/params";
 
 @Component({
   selector: 'app-announcements',
@@ -15,6 +15,7 @@ export class AnnouncementsComponent implements OnInit {
   announcementForm: FormGroup;
   announcementText = '';
   confirmList = Params.confirmList;
+  executorList = Params.executorList;
 
   get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray };
 
@@ -33,6 +34,7 @@ export class AnnouncementsComponent implements OnInit {
 
     this.announcementForm = this.fb.group({
       date: ['', Validators.required],
+      executor: [null, Validators.required],
       tasks: this.fb.array([], Validators.required)
     });
 
@@ -112,8 +114,10 @@ export class AnnouncementsComponent implements OnInit {
       item.summary + "\n" +
       'Исполнитель: ' + item.devName + "\n" +
       'Тестировщик: ' + item.testName + "\n" +
-      'Подтверждение бизнеса: ' + item.confirm + "\n\n";
+      'Подтверждение бизнеса: ' + item.confirm + "\n";
     });
+    this.announcementText = this.announcementText +
+      'Выливает: ' + data.executor + "\n\n";
   }
 
 }

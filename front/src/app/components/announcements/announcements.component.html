@@ -35,6 +35,21 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+          <div class='col-sm-6'>
+                <div class="form-group">
+                    <div class='input-group'>
+                      <select formControlName="executor" class="form-control">
+                        <option disabled [value]="null">Виберіть виконавця</option>
+                        <!--option value=" " selected>Виберіть виконавця</option-->
+                        <option *ngFor="let itemC of executorList" [value] = "itemC">
+                          {{itemC}}
+                        </option>
+                      </select>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <table class="table table-striped w-auto" formArrayName="tasks">
