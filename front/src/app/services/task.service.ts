@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from '@services/base.service';
 import { HttpService } from '@services/http.service';
 import { SprintSearch } from '@models/search.model';
+import {Observable} from "rxjs";
 
 @Injectable()
 export class TaskService extends BaseService {
@@ -46,9 +47,9 @@ export class TaskService extends BaseService {
         return this.service._get();
     }
 
-    public getBoards(): Promise<any> {
-        this.service.setUrl(`boards?name=market`);
-        return this.service._get();
+    public getBoards(name: string): Observable<any> {
+        this.service.setUrl(`boards?name=${name}`);
+        return this.service._getObserv();
     }
 
     public getTaskAnnouncement(params: {number: string}): Promise<any> {

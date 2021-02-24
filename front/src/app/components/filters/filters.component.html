@@ -1,34 +1,48 @@
 <div *ngIf="loading">
-    <span class="spinner-border spinner-border-sm mr-1"></span>
+  <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
 <div *ngIf="!loading">
-    <h2>Дошки</h2>
-    <select (change)="onChangeBoard($event.target.value)">
-        <option></option>
-        <option *ngFor="let board of boards" [value]="board.id">
-            {{board.name}}
-        </option>
-    </select>
+  <div class="container">
+    <div class="col-sm-8 contact-form">
+      <h2>Дошки</h2>
+      <div class="row">
+        <div class="col-xs-9 col-md-9 form-group">
+          <label for="nameBoard" class="label-block">Фільтр</label>
+          <input id="nameBoard" type="text" [formControl]="nameBoard" maxlength="300" placeholder="Введіть назву дошки">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-9 col-md-9 form-group">
+          <select (change)="onChangeBoard($event.target.value)">
+            <option></option>
+            <option *ngFor="let board of boards" [value]="board.id">
+              {{board.name}}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div *ngIf="loadingSprint">
-    <span class="spinner-border spinner-border-sm mr-1"></span>
+  <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
 <div *ngIf="!loadingSprint && sprints && sprints.length">
-    <h2>Спрінти</h2>
-    <div class="main">
-        <div class="main__item" *ngFor="let sprint of sprints">
-            <input (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
-                id="{{sprint.name}}">
-            <label for="{{sprint.name}}">
-                {{sprint.name}}
-            </label>
-        </div>
-        <div *ngIf="!metaSearch.isLast">
-            <button (click)="addSprints()">наступні</button>
-        </div>
+  <h2>Спрінти</h2>
+  <div class="main">
+    <div class="main__item" *ngFor="let sprint of sprints">
+      <input (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
+             id="{{sprint.name}}">
+      <label for="{{sprint.name}}">
+        {{sprint.name}}
+      </label>
     </div>
-    <div>
-        <button (click)="find()">Пошук</button>
+    <div *ngIf="!metaSearch.isLast">
+      <button (click)="addSprints()">наступні</button>
     </div>
+  </div>
+  <div>
+    <button (click)="find()">Пошук</button>
+  </div>
 </div>
