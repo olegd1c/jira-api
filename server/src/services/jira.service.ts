@@ -191,7 +191,11 @@ export class JiraService {
 
             });
         });
-        
+
+        [devAvg, testAvg, reviewerAvg].map(avg => {
+            sortList(avg);
+        });
+
         [devAvg, testAvg].map(avg => {
             countAvg(avg, true);
         });
@@ -449,6 +453,17 @@ function countAvg(avg, useTotal = false) {
     if (useTotal) {
         avg.push(total);
     }
+}
+
+function sortList(list, ) {
+    list.sort(function(a, b){
+        var nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase()
+        if (nameA < nameB) //sort string ascending
+            return -1
+        if (nameA > nameB)
+            return 1
+        return 0 //default return value (no sorting)
+    });
 }
 
 function getLinkTask(key: string) {
