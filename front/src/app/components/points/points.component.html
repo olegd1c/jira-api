@@ -1,4 +1,4 @@
-<app-filters (search)="onSearch($event)"></app-filters>
+<app-filters (search)="onSearch($event)" [parent]="parentFilter.point"></app-filters>
 
 <div *ngIf="loading">
     <span class="spinner-border spinner-border-sm mr-1"></span>
@@ -52,8 +52,8 @@
                 </tr>
 
             </table>
-        </div>        
-        
+        </div>
+
         <h3>Таблиця загрузки тестувальників</h3>
         <div>
             <table border="1">
@@ -76,7 +76,7 @@
                 </tr>
 
             </table>
-        </div>        
+        </div>
         <br>
         <button (click)="showDetails = !showDetails">{{(showDetails) ? 'Заховати деталі' : 'Показати деталі'}}</button>
         <div *ngIf="showDetails">

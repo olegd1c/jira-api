@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskService } from '@services/task.service';
 import { Analytics } from '@models/point.model';
+import { ParamsFilter, ParentFilter } from '@models/filter.model';
 
 @Component({
   selector: 'app-points',
@@ -8,32 +9,29 @@ import { Analytics } from '@models/point.model';
   styleUrls: ['./points.component.scss']
 })
 export class PointsComponent implements OnInit {
-  
   title = 'points';
   points: Analytics;
   loading = false;
   showDetails = false;
   sprints;
+  parentFilter = ParentFilter;
 
   constructor(private taskService: TaskService) { }
 
-  ngOnInit(): void {
-    
-  }
+  ngOnInit(): void { }
 
-  private getPoints(params) {
+  private getPoints(params: ParamsFilter) {
     this.loading = true;
     this.taskService.getPoints(params).then(result => {
-      //console.log(result);
       this.points = result;
       this.loading = false;
     });
   }
 
-  onSearch($event) {
+  onSearch($event: ParamsFilter) {
     if ($event) {
       this.sprints = $event.sprints;
-      let params = {boardId: $event.boardId, sprints: $event.sprints};
+      const params: ParamsFilter = $event;
       this.getPoints(params);
     } else {
       this.points = null;

@@ -3,16 +3,31 @@
 </div>
 <div *ngIf="!loading">
   <div class="container">
-    <div class="col-sm-8 contact-form">
-      <h2>Дошки</h2>
+    <div *ngIf = "parent === parentFilter.point">
       <div class="row">
-        <div class="col-xs-9 col-md-9 form-group">
+        <h2 class="form-group">Статуси задач</h2>
+      </div>
+      <div class="row">
+        <div class="form-check form-check-inline" *ngFor="let status of statusesTask">
+          <input class="form-check-input" (change)="onChangeStatus(status.id, $event.target.checked)" name="{{ status.name }}" type="checkbox"
+                 id="{{status.name}}">
+          <label class="form-check-label" for="{{status.name}}">
+            {{status.name}}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form">
+      <h2 >Дошки</h2>
+      <div class="row">
+        <div class="form-group">
           <label for="nameBoard" class="label-block">Фільтр</label>
-          <input id="nameBoard" type="text" [formControl]="nameBoard" maxlength="300" placeholder="Введіть назву дошки">
+          <input type="text" [formControl]="nameBoard" maxlength="300" placeholder="Введіть назву дошки">
         </div>
       </div>
       <div class="row">
-        <div class="col-xs-9 col-md-9 form-group">
+        <div class="form-group">
           <select (change)="onChangeBoard($event.target.value)">
             <option></option>
             <option *ngFor="let board of boards" [value]="board.id">
@@ -28,13 +43,13 @@
 <div *ngIf="loadingSprint">
   <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
-<div *ngIf="!loadingSprint && sprints && sprints.length">
+<div class="container" *ngIf="!loadingSprint && sprints && sprints.length">
   <h2>Спрінти</h2>
-  <div class="main">
-    <div class="main__item" *ngFor="let sprint of sprints">
-      <input (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
+  <div class="row">
+    <div class="form-check form-check-inline" *ngFor="let sprint of sprints">
+      <input class="form-check-input" (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
              id="{{sprint.name}}">
-      <label for="{{sprint.name}}">
+      <label class="form-check-label" for="{{sprint.name}}">
         {{sprint.name}}
       </label>
     </div>

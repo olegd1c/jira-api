@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-//import { BaseService } from '@app/services/base.service';
-//import { HttpService } from '@app/services/http.service';
 import { BaseService } from '@services/base.service';
 import { HttpService } from '@services/http.service';
 import { SprintSearch } from '@models/search.model';
-import {Observable} from "rxjs";
+import { Observable } from 'rxjs';
+import { ParamsFilter } from '@models/filter.model';
 
 @Injectable()
 export class TaskService extends BaseService {
@@ -15,20 +14,26 @@ export class TaskService extends BaseService {
     }
 
     public getTasks(params: {boardId: number, sprints: number[]}): Promise<any> {
-      let queryParams = 'boardId='+params.boardId;
+      let queryParams = 'boardId=' + params.boardId;
       params.sprints.map(item => {
-        queryParams = queryParams + '&sprintsId='+item;
+        queryParams = queryParams + '&sprintsId=' + item;
       });
 
       this.service.setUrl(`${this.url}?${queryParams}`);
       return this.service._get();
     }
 
-    public getPoints(params: {boardId: number, sprints: number[]}): Promise<any> {
-        let queryParams = 'boardId='+params.boardId;
+    public getPoints(params: ParamsFilter): Promise<any> {
+        let queryParams = 'boardId=' + params.boardId;
         params.sprints.map(item => {
-            queryParams = queryParams + '&sprintsId='+item;
+            queryParams = queryParams + '&sprintsId=' + item;
         });
+
+        if (params.statusesTask && params.statusesTask.length) {
+          params.statusesTask.map(item => {
+            queryParams = queryParams + '&statusesTask=' + item;
+          });
+        }
 
         this.service.setUrl(`pointsByDev?${queryParams}`);
         return this.service._get();

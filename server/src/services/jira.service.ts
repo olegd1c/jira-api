@@ -204,11 +204,13 @@ export class JiraService {
         const sprintId = query.sprintId;
         const sprintsId = query.sprintsId;
         const keys = query.keys;
+        const statusesTask = query.statusesTask;
 
         if (sprintsId || keys) {
 
             let sprintIds = '';
             let keyIds = '';
+            let statusTask = '';
 
             if (sprintsId && typeof sprintsId !== 'string' && sprintsId.length > 0) {
                 sprintIds = sprintsId.toString();
@@ -222,10 +224,22 @@ export class JiraService {
                 keyIds = keys;
             }
 
+            if (statusesTask && statusesTask.length > 0) {
+                statusTask = statusesTask.toString();
+            }
+
             let jql = '';
+
+            if (statusTask) {
+                jql = `status in (${statusTask})`;
+            }
+
             if (sprintIds) {
-                //status = Done AND             
-                jql = `type in (Task, Bug, Story) AND Sprint in (${sprintIds}) ORDER BY Sprint ASC`;
+                if (jql) {
+                    jql = jql + ' AND ';
+                }
+
+                jql = jql + `type in (Task, Bug, Story) AND Sprint in (${sprintIds}) ORDER BY Sprint ASC`;
             } else if (keyIds) {
                 jql =  `issuekey in (${keyIds})`;
             }
