@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import * as JiraApi from "jira-client"
 import { ConfigService } from '@nestjs/config';
 import { Task, Analytics, Assignee, PointAvg, TaskAnnouncement } from '@shared_models/task.model';
+import { Sprint } from '@shared_models/sprint.model';
 import { User } from '@models/user.model';
-
 import { FieldTask } from '@models/field.model';
 import { SprintPoint } from '@app/models/task.model';
 
@@ -77,18 +77,13 @@ export class JiraService {
         return jiraApi.getAllSprints(boardId, start, pageSize).then(result => {
 
             //console.log('getAllSprints: ' + JSON.stringify(result));
-            let items = [];
+            let items: Sprint[] = [];
             result.values.forEach(item => {
-                items.push({id: item.id, name: item.name});
+                items.push({id: item.id, name: item.name, state: item.state, startDate: item.startDate, endDate: item.endDate, completeDate: item.completeDate});
             });
 
-            items.sort((a,b) => {
-                if (a.name > b.name) {
-                    return 1
-                } else {
-                    return -1
-                }
-            });
+            sortList(items);
+
             return {meta:{isLast: result.isLast, start: result.startAt, pageSize: result.maxResults}, values: items};
         })
             .catch(function (err) {

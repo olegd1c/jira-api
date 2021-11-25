@@ -21,5 +21,6 @@ export const statusesTask = [
   {id: 'InTesting', name: 'InTesting'},
   {id: 'ForBuild', name: 'ForBuild'},
   {id: 'InBuild', name: 'InBuild'},
-  {id: 'Done', name: 'Done'}
+  {id: 'Done', name: 'Done'},
+  {id: 'Closed', name: 'Closed'}
 ];
