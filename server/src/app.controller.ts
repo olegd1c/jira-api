@@ -104,4 +104,15 @@ export class AppController {
   ): Promise<any> {
     return this.jiraService.updateStoryPoints(data);
   }
+
+  @MetaPermissions(Permissions.notify)
+  @UseGuards(JwtAuthGuard)
+  @Post('send-reminder')
+  @SetMetadata('permissions', [Permissions.notify])
+  sendReminder(
+
+  ): Promise<any> {
+    console.log('send-reminder');
+    return this.telegramBotService.sendReminder();
+  }
 }

@@ -120,4 +120,12 @@ export class AnnouncementsComponent implements OnInit {
       'Выливает: ' + data.executor + "\n\n";
   }
 
+  sendReminder() {
+    this.taskService.sendReminder().then(
+      result => {
+
+      });
+
+  }
+
 }

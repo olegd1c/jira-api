@@ -10,6 +10,7 @@
     "outDir": "./dist/server",
     "baseUrl": "./",
     "incremental": true,
+    "resolveJsonModule": true,
     "paths": {
       "@app/*": [
         "src/*"

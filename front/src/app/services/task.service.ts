@@ -68,6 +68,12 @@ export class TaskService extends BaseService {
         return this.service._post();
     }
 
+  public sendReminder(data?: {message: string}): Promise<any> {
+    //this.service.setEntity(data);
+    this.service.setUrl(`send-reminder`);
+    return this.service._post();
+  }
+
     public updateStoryPoints(data: {boardId: string, keys?: string[]}): Promise<any> {
         this.service.setEntity(data);
         this.service.setUrl(`update-story-points`);
