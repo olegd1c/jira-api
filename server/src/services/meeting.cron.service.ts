@@ -8,7 +8,7 @@ export class MeetingCronService {
 
     constructor(private telegramBotService: TelegramBotService) {}
 
-    @Cron("0 */5 * * * 1-5")
+    @Cron("*/5 08-19 * * 1-5")
     handleCron() {
         //this.logger.debug('MeetingCronService when the current second is 1');
         
