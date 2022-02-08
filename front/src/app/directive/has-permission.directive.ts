@@ -18,16 +18,14 @@ export class HasPermissionDirective implements OnInit {
   }
 
   ngOnInit() {
-    this.authenticationService.currentUser.subscribe(user => {
-      this.currentUser = user;
-      this.updateView();
-    });
+    this.currentUser = this.authenticationService.getCurrentUser();
+    this.updateView();
   }
 
   @Input()
   set hasPermission(val) {
     this.permissions = val;
-    this.updateView();
+    //this.updateView();
   }
 
   private updateView() {

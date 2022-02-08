@@ -45,7 +45,7 @@ export class AuthenticationService extends BaseService {
     LocalStorageHelper.setStorageForATime('authData', JSON.stringify(res));
   }
 
-  private getCurrentUser() {
+  getCurrentUser() {
     let result = null;
     let data = localStorage.getItem('authData');
     if (data) {

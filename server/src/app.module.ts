@@ -1,20 +1,29 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './services/app.service';
-import { JiraService } from './services/jira.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TelegramBotService } from './services/telegram-bot.service';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksService } from '@services/tasks.service';
-import { MongooseConfigService } from '@app/mongo/service/mongoose.config.service';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import CasesModule from './controllers/case/case.module';
+import TeamModule from "@app/controllers/team/team.module";
+import MeetingModule from '@app/controllers/meeting/meeting.module';
+import UserModule from './controllers/user/user.module';
+
+import { TasksService } from '@services/tasks.service';
+import { AppService } from '@services/app.service';
+import { JiraService } from '@services/jira.service';
+import { MeetingCronService } from '@services/meeting.cron.service';
+import { ReviewCronService } from '@services/review.cron.service';
+import { TelegramBotService } from '@services/telegram-bot.service';
 import CasesService from './controllers/case/case.service';
+import MeetingService from './controllers/meeting/meeting.service';
+import UserService from './controllers/user/user.service';
+import TeamService from './controllers/team/team.service';
 
 ConfigModule.forRoot({
   envFilePath: ['.env.local', '.env'], 
-});
+})
 
 @Module({
   imports: [
@@ -44,7 +53,10 @@ ConfigModule.forRoot({
     //MongooseModule.forRootAsync({
     //  useClass: MongooseConfigService,
     //})
-    CasesModule
+    CasesModule,
+    MeetingModule,
+    UserModule,
+    TeamModule
   ],
   controllers: [AppController],
   providers: [
@@ -53,7 +65,15 @@ ConfigModule.forRoot({
     ConfigService,
     TelegramBotService,
     TasksService,
-    CasesService
+    CasesService,
+    MeetingService,
+    UserService,
+    MeetingCronService,
+    ReviewCronService,
+    TeamService
   ],
+  exports: [
+    MeetingService
+  ]
 })
 export class AppModule {}

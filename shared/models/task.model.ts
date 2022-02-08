@@ -9,7 +9,9 @@ export interface Task {
     sprintName: string;
     sprintsName: string;
     reviewers: [];
+    reviews_conducted: [],
     link: string;
+    summary: string;
 }
 
 export interface Analytics {

@@ -4,5 +4,7 @@ export enum FieldTask {
     tester = 'customfield_10401',
     sprints = 'customfield_10107',
     pointTest = 'customfield_10205',
-    pointStory = 'customfield_10130'
+    pointStory = 'customfield_10130',
+    summary = 'summary',
+    comment = 'comment'
 }

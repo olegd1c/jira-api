@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import * as JiraApi from "jira-client"
 import { ConfigService } from '@nestjs/config';
 import { Task, Analytics, Assignee, PointAvg, TaskAnnouncement } from '@shared_models/task.model';
-import { Sprint } from '@shared_models/sprint.model';
+import {Sprint, StateSprint} from '@shared_models/sprint.model';
 import { User } from '@models/user.model';
 import { FieldTask } from '@models/field.model';
 import { SprintPoint } from '@app/models/task.model';
@@ -51,7 +51,24 @@ export class JiraService {
                     const pointStory = issue.fields[FieldTask.pointStory];
                     const link = getLinkTask(key);
 
-                    result = { devName: devName, pointDev: pointDev, testName: testName, pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName, pointStory: pointStory, link: link };
+                    const summary = issue.fields[FieldTask.summary];
+                    const comment = issue.fields[FieldTask.comment];
+                    const reviews_conducted = [];
+                    if (comment && comment.comments && comment.comments.length) {
+                        comment.comments.forEach(element => {
+                            ['review+', 'review +', 'ревью+', 'ревью +'].map(elemR => {
+                                if (element.body.includes(elemR)
+                                    && element.author) 
+                                    {
+                                    reviews_conducted.push(element.author.name);
+                            }
+                            })
+                        });
+                    }
+
+                    result = { devName: devName, pointDev: pointDev, testName: testName,
+                        pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName,
+                        pointStory: pointStory, link: link, summary: summary, reviews_conducted: reviews_conducted };
                 } else {
                     console.log('не найден: ' + key);
                 }
@@ -67,14 +84,15 @@ export class JiraService {
 
     async getAllSprints(params, user?: User): Promise<any> {
         //console.log(user);
-        let start: number, pageSize: number, boardId: string;
+        let start: number, pageSize: number, boardId: string, state: StateSprint;
         //console.log('getAllSprints', params);
         
         start = (params.start) ? params.start : 0;
         pageSize = (params.pageSize) ? params.pageSize : 50;
         boardId = (params.boardId) ? params.boardId : '';
+        state = (params.state) ? params.state : undefined;
 
-        return jiraApi.getAllSprints(boardId, start, pageSize).then(result => {
+        return jiraApi.getAllSprints(boardId, start, pageSize, state).then(result => {
 
             //console.log('getAllSprints: ' + JSON.stringify(result));
             let items: Sprint[] = [];
@@ -118,6 +136,24 @@ export class JiraService {
         const result: Analytics = {sprints: temp, sprintsAvg: {dev: devAvg, test: testAvg, reviewer: reviewerAvg}};
 
         return result;
+    }
+
+    async getTaskForReview(boardId: number): Promise<any> {
+
+        if (!jiraApi) {
+            const result = await this.initJiraApiBot();
+
+            if (!result) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
+        }
+
+        const strints = await this.getAllSprints({boardId: boardId, state: StateSprint.active});
+        const sprintId = strints.values[0]['id'];
+        const params = {boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview']};
+        const tasks: Task[] = await this.getAllTasks(params);
+
+        return tasks;
     }
 
     private parsePointTasks(tasks: Task[]) {
@@ -384,6 +420,21 @@ export class JiraService {
             });
     }
 
+    private async initJiraApiBot() {
+        const username = this.configService.get<string>('JIRA_API_BOT_LOGIN');
+        const password = this.configService.get<string>('JIRA_API_BOT_PASS');
+
+        const user = {username, password};
+        let result;
+
+        try {
+            result = await this.getJiraApi(user);
+        } catch (e) {
+
+        }
+
+        return result;
+    }
 }
 
 function getSprintName(fieldSprints: string[]) {

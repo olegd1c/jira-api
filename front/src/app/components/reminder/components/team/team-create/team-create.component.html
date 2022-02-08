@@ -1,0 +1,63 @@
+<div class="page-content inset">
+  <div class="row">
+    <div class="col-md-12">
+      <!-- main app container -->
+
+      <div class="jumbotron">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-8">
+              <h2>Команда</h2>
+              <form [formGroup]="dataForm" (ngSubmit)="create()">
+                <div class="form-group">
+                  <label for="name">Заголовок</label>
+                  <input type="text" formControlName="name" placeholder="MarketFront"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" />
+                  <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                    <div *ngIf="f.name.errors.required">Назва обов"язкова</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="reviewChatId">Ревью чат ід</label>
+                  <input type="text" formControlName="reviewChatId" placeholder="65462134684"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.reviewChatId.errors }" />
+                  <div *ngIf="submitted && f.reviewChatId.errors" class="invalid-feedback">
+                    <div *ngIf="f.reviewChatId.errors.required">Ревью чат ід обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="teamChatId">Командний чат ід</label>
+                  <input type="text" formControlName="teamChatId" placeholder="65462134685"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.teamChatId.errors }" />
+                  <div *ngIf="submitted && f.teamChatId.errors" class="invalid-feedback">
+                    <div *ngIf="f.teamChatId.errors.required">Командний чат ід обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="boardId">ІД дошки</label>
+                  <input type="text" formControlName="boardId" placeholder="405"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.boardId.errors }" />
+                  <div *ngIf="submitted && f.boardId.errors" class="invalid-feedback">
+                    <div *ngIf="f.boardId.errors.required">ІД дошки обов"язковий</div>
+                  </div>
+                </div>
+                <div class=" form-check">
+                  <input type="checkbox" formControlName="checkReview"
+                         class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkReview.errors }" />
+                  <label class="form-check-label" for="checkReview">Запуск крона перевірки ревью</label>
+                </div>
+
+                <div class="form-group">
+                  <button [disabled]="submitted" type="submit" class="btn btn-primary">
+                    <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                    Записати
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

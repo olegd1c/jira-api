@@ -1,97 +1,199 @@
 import CasesService from '@app/controllers/case/case.service';
-import { User } from '@app/models/user.model';
-import { HttpService, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CronJob } from 'cron';
+import {User} from '@app/models/user.model';
+import {HttpService, Injectable} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
+import {CronJob} from 'cron';
+import {Task} from '@shared_models/task.model';
+import {Meeting} from '@app/controllers/meeting/meeting.schema';
+import {JiraService} from '@services/jira.service';
+import UserService from '@app/controllers/user/user.service';
+import TeamService from '@app/controllers/team/team.service';
+import MeetingService from '@app/controllers/meeting/meeting.service';
+import {User as UserMeeting} from '@app/controllers/user/user.schema';
+import { Team } from '@app/controllers/team/team.schema';
 
 @Injectable()
 export class TelegramBotService {
 
-  private url = 'https://api.telegram.org/bot';
-  
-  constructor(private httpService: HttpService, private configService: ConfigService, private casesService: CasesService) {
+    private url = 'https://api.telegram.org/bot';
 
-  }
+    constructor(
+        private httpService: HttpService,
+        private configService: ConfigService,
+        private casesService: CasesService,
+        private meetingService: MeetingService,
+        private jiraService: JiraService,
+        private userService: UserService,
+        private teamService: TeamService,
+    ) {
 
-  async sendMessage(data: {message: string}, user: User): Promise<any> {
-    const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
-    const chatId = this.configService.get('TELEGRAM_CHAT_ID');
-    const botId = this.configService.get('TELEGRAM_BOT_ID');
+    }
 
-    const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+    async sendMessage(data: { message: string }, user: User): Promise<any> {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        const chatId = this.configService.get('TELEGRAM_CHAT_ID');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
 
-    let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
-    apiUrl = encodeURI(apiUrl);
-    const headersRequest = {
-        'Content-Type': 'application/json'
-    };
+        const message = data.message + 'Автор сообщения: ' + user.displayName + "\n\n";
 
-    const result = await this.httpService.get(apiUrl, { headers: headersRequest }).toPromise();
-    return result && result.status == 200 ? true : false;
-  }
+        let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
+        apiUrl = encodeURI(apiUrl);
+        const headersRequest = {
+            'Content-Type': 'application/json'
+        };
 
-  async sendReminder(): Promise<any> {
-    const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
-    const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
-    const botId = this.configService.get('TELEGRAM_BOT_ID');
+        const result = await this.httpService.get(apiUrl, {headers: headersRequest}).toPromise();
+        return result && result.status == 200 ? true : false;
+    }
 
-    //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
-    const message = 'Стендап 10.30'+"\n\n"+'@BogusUA @olegd1c';
+    async sendReminder(): Promise<any> {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
 
-    let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
-    apiUrl = encodeURI(apiUrl);
-    const headersRequest = {
-        'Content-Type': 'application/json'
-    };
-    const result = await this.httpService.get(apiUrl, { headers: headersRequest }).toPromise();
+        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+        const message = 'Стендап 10.30' + "\n\n" + '@BogusUA @olegd1c';
 
-    return result && result.status == 200 ? true : false;
-  }
+        let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
+        apiUrl = encodeURI(apiUrl);
+        const headersRequest = {
+            'Content-Type': 'application/json'
+        };
+        const result = await this.httpService.get(apiUrl, {headers: headersRequest}).toPromise();
 
-  async sendReminderCron(): Promise<any> {
-    const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
-    //const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
-    const botId = this.configService.get('TELEGRAM_BOT_ID');
-    
-    //const data = await import('../data/tasks.json');
-    const data = await this.casesService.findCurrent();
+        return result && result.status == 200 ? true : false;
+    }
 
-    data.forEach((item) => {
+    async sendReminderCron(): Promise<any> {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        //const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
 
-      const cr = new CronJob(item.cronTime, () => {
-        this.sendNotify(item, botId, token);
-      });
-      
-      cr.start();
+        //const data = await import('../data/tasks.json');
+        const data = await this.meetingService.findCurrent();
 
-      setTimeout(() => {
-        cr.stop();
-      }, 61*1000);
-    });
+        data.forEach((item) => {
 
-    //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+            const cr = new CronJob(item.cronTime, () => {
+                this.sendNotify(item, botId, token);
+            });
 
-  }
+            cr.start();
 
-  private sendNotify(item, botId, token) {
-    const message = prepareMessage(item);
-    const chatId = item.chatId;
-  
-    let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
-    apiUrl = encodeURI(apiUrl);
-    const headersRequest = {
-      'Content-Type': 'application/json'
-    };
-  
-    this.httpService.get(apiUrl, { headers: headersRequest }).subscribe();
-  }
+            setTimeout(() => {
+                cr.stop();
+            }, 61 * 1000);
+        });
+
+        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+
+    }
+
+    private sendNotify(item: Meeting, botId, token, chatIdBot?) {
+        const message = prepareMessage(item);
+        let chatId = chatIdBot ? chatIdBot : (item.team as Team).teamChatId;
+
+        let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
+        apiUrl = encodeURI(apiUrl);
+        const headersRequest = {
+            'Content-Type': 'application/json'
+        };
+
+        this.httpService.get(apiUrl, {headers: headersRequest}).subscribe();
+    }
+
+    async sendReminderMeetings(): Promise<any> {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        //const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
+
+        const data = await this.meetingService.findCurrent();
+
+        data.forEach((item) => {
+
+            const cr = new CronJob(item.cronTime, () => {
+                this.sendNotify(item, botId, token);
+            });
+
+            cr.start();
+
+            setTimeout(() => {
+                cr.stop();
+            }, 61 * 1000);
+        });
+
+        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+
+    }
+
+    async sendReminderReview(): Promise<any> {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
+
+        const teams = await this.teamService.findForReview();
+
+        teams.forEach(item => {
+                this.findTasks(item, botId, token);
+            }
+        )
+        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
+
+    }
+
+    private async findTasks(elem: Team, botId: string, token: string) {
+        const tasks: Task[] = await this.jiraService.getTaskForReview(elem.boardId);
+
+        if (tasks.length) {
+
+            const data: Meeting[] = this.parseReviewTasks(tasks, elem.users);
+
+            data.forEach((item) => {
+                this.sendNotify(item, botId, token, elem.reviewChatId);
+            });
+        }
+    }
+
+    private parseReviewTasks(tasks: Task[], users: UserMeeting[]) {
+
+        let title = 'Задача в ревью: ' + "\n";
+
+        const result: Meeting[] = [];
+
+        if (tasks) {
+            tasks.forEach((item: Task) => {
+                let tempMeeting = {title: title + item.link + "\n" + item.summary, users: []};
+                let tmpReviewer = '';
+                item.reviewers.forEach((reviewer: string) => {
+                    let tmpReviewer = {name: reviewer, telegramLogin: ''};
+                    
+                    const fUser = users.filter((item) => item.jiraLogin == reviewer);
+
+                    if (fUser.length > 0) {
+                        tmpReviewer.name = fUser[0].name;
+                        const fReviewsConductediews = item.reviews_conducted.filter((elem) => elem == reviewer);
+                        if (fReviewsConductediews.length == 0) {
+                            tmpReviewer.telegramLogin = fUser[0].telegramLogin;
+                        }
+                    }
+                    tempMeeting.users.push(tmpReviewer);
+                });
+                //tempMeeting.users.push(tmpReviewer);
+
+                result.push(tempMeeting);
+
+            });
+        }
+
+        return result;
+    }
 }
 
-function prepareMessage(item: { time: string; title: string; chatId: number; users: { name: string; }[]; }) {
-  let mess = item.title+"\n";
-  item.users.forEach(u => {
-    mess = mess + u.name+"\n";
-  });
-  
-  return mess;
+function prepareMessage(item: { title: string; users?: UserMeeting[]; }) {
+    let mess = item.title + "\n";
+    
+    item.users && item.users.map(u => {
+        mess = mess + u.name + ( u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
+    });
+
+    return mess;
 }

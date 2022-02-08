@@ -1,0 +1,56 @@
+<div class="page-content inset">
+  <div class="row">
+    <div class="col-md-12">
+      <!-- main app container -->
+      <div class="jumbotron">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-8">
+              <h2>Коричстувач</h2>
+              <form [formGroup]="userForm" (ngSubmit)="create()">
+                <div class="form-group">
+                  <label for="team">Команда</label>
+                  <select formControlName="team" class="form-control">
+                    <option *ngFor="let team of teams" [value] = "team._id">
+                      {{team.name}}
+                    </option>
+                  </select>
+                  <div *ngIf="submitted && f.team.errors" class="invalid-feedback">
+                    <div *ngIf="f.team.errors.required">Назва команди обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="name">Им"я</label>
+                  <input type="text" formControlName="name" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" />
+                  <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                    <div *ngIf="f.name.errors.required">Имя обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="jiraLogin">Jira login</label>
+                  <input type="text" formControlName="jiraLogin" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.jiraLogin.errors }" />
+                  <div *ngIf="submitted && f.jiraLogin.errors" class="invalid-feedback">
+                    <div *ngIf="f.jiraLogin.errors.required">Jira login обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="telegramLogin">Telegram login</label>
+                  <input type="text" formControlName="telegramLogin" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.telegramLogin.errors }" />
+                  <div *ngIf="submitted && f.telegramLogin.errors" class="invalid-feedback">
+                    <div *ngIf="f.telegramLogin.errors.required">Telegram login обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <button [disabled]="submitted" type="submit" class="btn btn-primary">
+                    <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                    Записати
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

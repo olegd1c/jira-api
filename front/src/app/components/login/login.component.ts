@@ -10,7 +10,7 @@ export class LoginComponent implements OnInit {
     loginForm: FormGroup;
     loading = false;
     submitted = false;
-    returnUrl: string = 'points';
+    returnUrl: string = '/main/points';
 
     constructor(
         private formBuilder: FormBuilder,
@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
     ngOnInit() {
         this.authenticationService.currentUser.subscribe(x => {
             if (x) {
-                this.router.navigate(['/points']);
+                this.router.navigate(['/main/points']);
             }
         });
 
