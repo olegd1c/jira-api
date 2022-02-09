@@ -363,7 +363,19 @@ export class JiraService {
 
                     const testName = (fieldTest) ? fieldTest[0].displayName : '';
 
-                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key};
+                    const issuelinks = issue.fields['issuelinks'];
+                    let links = '';
+                    const buildLabel = issue.fields['labels'].filter(l => l == 'build');
+                    
+                    if (issuelinks) {
+                        issuelinks.map(t => {
+                            if (t.inwardIssue) {
+                                links = links + t.inwardIssue.key + ';';
+                            }
+                        });
+                    }    
+
+                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links};
                 } else {
                     console.log('не найден: ' + key);
                 }

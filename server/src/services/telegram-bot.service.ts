@@ -119,7 +119,7 @@ export class TelegramBotService {
 
             setTimeout(() => {
                 cr.stop();
-            }, 61 * 1000);
+            }, 60 * 1000);
         });
 
         //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";

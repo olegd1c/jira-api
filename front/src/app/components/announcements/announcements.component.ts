@@ -16,6 +16,7 @@ export class AnnouncementsComponent implements OnInit {
   announcementText = '';
   confirmList = Params.confirmList;
   executorList = Params.executorList;
+  links = '';
 
   get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray };
 
@@ -49,17 +50,30 @@ export class AnnouncementsComponent implements OnInit {
 
   search() {
     this.loading = true;
-    this.taskService.getTaskAnnouncement({ number: this.searchForm.controls.number.value })
-    .then(result => {
-      let tempV: any[] = this.tasksForm.value;
-      let fItem = tempV.find(item => item.key ===  result.key);
-      if(!fItem) {
-        this.tasksForm.push(this.initTaskForm(result));
-      }
+    const numberTask: string = this.searchForm.controls.number.value;
+    let numbers = [];
 
-      this.searchForm.reset();
-      this.loading = false;
-    }).catch(() => this.loading = false);
+    if (numberTask.split(';').length) {
+      numbers = numberTask.split(';');
+    } else {
+      numbers.push(numberTask);
+    }
+
+    numbers.map(n => {
+      this.taskService.getTaskAnnouncement({ number: n })
+        .then(result => {
+          const tempV: any[] = this.tasksForm.value;
+          const fItem = tempV.find(item => item.key ===  result.key);
+          if (!fItem) {
+            this.tasksForm.push(this.initTaskForm(result));
+          }
+
+          this.links = result['links'];
+
+          this.searchForm.reset();
+          this.loading = false;
+        }).catch(() => this.loading = false);
+    });
   }
 
   private initTaskForm(item: TaskAnnouncement): FormGroup {
@@ -120,12 +134,13 @@ export class AnnouncementsComponent implements OnInit {
       'Выливает: ' + data.executor + "\n\n";
   }
 
-  sendReminder() {
-    this.taskService.sendReminder().then(
-      result => {
+  changeConfirm(event) {
 
-      });
-
+    this.tasksForm['controls'].map(elem => {
+      if (!elem.get('confirm').value) {
+        elem.patchValue({confirm: event.target.value});
+      }
+    });
   }
 
 }

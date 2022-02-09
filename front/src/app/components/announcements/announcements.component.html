@@ -10,6 +10,12 @@
                     </div>
                 </div>
 
+              <div class="row">
+                <div class="col-xs-9 col-md-9 form-group" *ngIf="links">
+                  Links: {{links}}
+                </div>
+              </div>
+
                 <div class="row">
                     <div class="col-xs-12 col-md-12 form-group">
                         <button [disabled]="!searchForm.valid" class="btn btn-primary pull-right" type="submit">Пошук</button>
@@ -73,7 +79,7 @@
                             <td>{{task.get('devName').value}}</td>
                             <td>{{task.get('testName').value}}</td>
                             <td>
-                                <select formControlName="confirm">
+                                <select formControlName="confirm" (change)="changeConfirm($event)">
                                     <option></option>
                                     <option *ngFor="let itemC of confirmList" [value] = "itemC">
                                         {{itemC}}
@@ -97,8 +103,6 @@
             </div>
         </div>
     </form>
-
-  <button class="btn btn-primary pull-right" (click)="sendReminder()">Нагадування</button>
 
     <textarea disabled cols="50" rows="15" [value]="announcementText"></textarea>
 </div>
