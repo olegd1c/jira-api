@@ -27,7 +27,7 @@ export class TeamCreateComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.itemId = this.route.snapshot.params['id'];
+    this.itemId = this.route.snapshot.params?.id;
 
     this.createForm();
     const tmpId = this.itemId;
@@ -70,6 +70,10 @@ export class TeamCreateComponent implements OnInit {
     }).catch(error => {
       this.loading = false;
     });
+  }
+
+  Cancel(){
+    this.router.navigate([this.url]);
   }
 
 }

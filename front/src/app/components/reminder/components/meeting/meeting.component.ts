@@ -3,6 +3,8 @@ import {Router} from '@angular/router';
 
 import {MeetingService} from '@app/components/reminder/components/meeting/meeting.service';
 
+import {weeksTypeArray, daysCronArray} from '@shared_models/meeting.model';
+
 @Component({
   selector: 'app-meeting',
   templateUrl: './meeting.component.html',
@@ -12,6 +14,9 @@ export class MeetingComponent implements OnInit {
   items;
   loading = false;
   url = '/main/reminder/meetings';
+
+  tmpWeeksType = weeksTypeArray();
+  tmpDaysCron = daysCronArray();
 
   constructor(private meetingService: MeetingService, private router: Router ) { }
 

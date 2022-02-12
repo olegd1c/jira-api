@@ -18,6 +18,7 @@ export class UserMeetingCreateComponent implements OnInit {
   teams;
   userId;
   userCopyId;
+  url = '/main/reminder/users';
 
   constructor(
     private service: UserMeetingService,
@@ -29,8 +30,8 @@ export class UserMeetingCreateComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.userId = this.route.snapshot.params['id'];
-    this.userCopyId = this.route.snapshot.params['copy_id'];
+    this.userId = this.route.snapshot.params?.id;
+    this.userCopyId = this.route.snapshot.params?.copy_id;
 
     this.createForm();
     this.getTeams();
@@ -56,7 +57,7 @@ export class UserMeetingCreateComponent implements OnInit {
       req = this.service.createUserMeeting(data);
     }
     req.then((result) => {
-      this.router.navigate(['/main/reminder/users']);
+      this.router.navigate([this.url]);
     });
   }
 
@@ -82,6 +83,10 @@ export class UserMeetingCreateComponent implements OnInit {
     }).catch(error => {
       this.loading = false;
     });
+  }
+
+  Cancel(){
+    this.router.navigate([this.url]);
   }
 
 }

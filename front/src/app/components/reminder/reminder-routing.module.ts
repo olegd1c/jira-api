@@ -13,7 +13,7 @@ const routes: Routes = [
   {
     path: '', canActivate: [ AuthGuard ],
     children: [
-      {path: '', redirectTo: 'meeting', pathMatch: 'full'},
+      {path: '', redirectTo: 'meetings', pathMatch: 'full'},
       { path: 'meetings', component: MeetingComponent , canActivate: [AuthGuard], data: {permissions: ['view']}},
       { path: 'meetings/create', component: MeetingCreateComponent , canActivate: [AuthGuard], data: {permissions: ['notify']}},
       { path: 'meetings/update/:id', component: MeetingCreateComponent , canActivate: [AuthGuard], data: {permissions: ['notify']}},

@@ -47,11 +47,19 @@
                   <label class="form-check-label" for="checkReview">Запуск крона перевірки ревью</label>
                 </div>
 
-                <div class="form-group">
-                  <button [disabled]="submitted" type="submit" class="btn btn-primary">
-                    <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
-                    Записати
-                  </button>
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                  <div class="btn-group mr-2" role="group" aria-label="First group">
+                    <button [disabled]="submitted" type="submit" class="btn btn-primary">
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      Записати
+                    </button>
+                  </div>
+                  <div class="btn-group mr-2" role="group" aria-label="Second group">
+                    <button (click)="Cancel()" class="btn btn-primary">
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      Відмінити
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

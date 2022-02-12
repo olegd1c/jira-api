@@ -104,7 +104,6 @@ export class TelegramBotService {
 
     async sendReminderMeetings(): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
-        //const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
         const data = await this.meetingService.findCurrent();
@@ -113,17 +112,8 @@ export class TelegramBotService {
 
             const cr = new CronJob(item.cronTime, () => {
                 this.sendNotify(item, botId, token);
-            });
-
-            cr.start();
-
-            setTimeout(() => {
-                cr.stop();
-            }, 60 * 1000);
+            }, null, true,null,null,null,null,true);
         });
-
-        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
-
     }
 
     async sendReminderReview(): Promise<any> {
@@ -136,8 +126,6 @@ export class TelegramBotService {
                 this.findTasks(item, botId, token);
             }
         )
-        //const message = data.message + 'Автор сообщения: ' + user.displayName +"\n\n";
-
     }
 
     private async findTasks(elem: Team, botId: string, token: string) {

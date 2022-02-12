@@ -19,7 +19,7 @@ class MeetingService {
     const currentDate = new Date();
     const currentTime = ('0'+currentDate.getHours()).slice(-2) + ':' + ('0'+currentDate.getMinutes()).slice(-2);
 
-    return this.meetingModel.find({ time: currentTime, days: { $in: [currentDate.getDay()] }})
+    return this.meetingModel.find({ time: currentTime})
       .or([{ weekType: WeekType.all }, { weekType: weekType }]).populate('team').populate('users')
     ;
   }

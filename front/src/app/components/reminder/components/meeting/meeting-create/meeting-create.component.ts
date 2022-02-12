@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {MeetingService} from '@app/components/reminder/components/meeting/meeting.service';
-import {TeamService} from '@app/components/reminder/components/team/team.service';
+import {MeetingService} from '@components/reminder/components/meeting/meeting.service';
+import {TeamService} from '@components/reminder/components/team/team.service';
+import {weeksType, daysCron } from '@shared_models/meeting.model';
 
 @Component({
   selector: 'app-meeting-create',
@@ -20,6 +21,8 @@ export class MeetingCreateComponent implements OnInit {
   meetingCopyId;
   teams;
   url = '/main/reminder/meetings';
+  tmpWeeksType = weeksType;
+  tmpDaysCron = daysCron;
 
   constructor(
     private meetingService: MeetingService,
@@ -31,8 +34,8 @@ export class MeetingCreateComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.meetingId = this.route.snapshot.params['id'];
-    this.meetingCopyId = this.route.snapshot.params['copy_id'];
+    this.meetingId = this.route.snapshot.params?.id;
+    this.meetingCopyId = this.route.snapshot.params?.copy_id;
 
     this.createForm();
     this.getTeams();
@@ -47,8 +50,8 @@ export class MeetingCreateComponent implements OnInit {
       users: [''],
       time: [''],
       chatId: [''],
-      cronTime: [''],
-      weekType: ['']
+      cronTime: [daysCron[0].id],
+      weekType: [weeksType[0].id]
     });
   }
 
@@ -87,5 +90,9 @@ export class MeetingCreateComponent implements OnInit {
     }).catch(error => {
       this.loading = false;
     });
+  }
+
+  Cancel(){
+    this.router.navigateByUrl(this.url);
   }
 }
