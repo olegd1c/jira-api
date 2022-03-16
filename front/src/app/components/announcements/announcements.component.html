@@ -98,7 +98,7 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-md-12 form-group">
-                <button [disabled]="!announcementForm.valid" class="btn btn-primary pull-right" type="submit">Відправити
+                <button [disabled]="sending || !announcementForm.valid" class="btn btn-primary pull-right" type="submit">Відправити
                     анонс</button>
             </div>
         </div>

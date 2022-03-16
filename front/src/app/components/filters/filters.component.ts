@@ -23,7 +23,6 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
   boards: any[];
   selectedSprints: number[] = [];
   nameBoard: FormControl = new FormControl('');
-  onlyInProgress: FormControl = new FormControl(false);
   parentFilter = ParentFilter;
   private nameFilter = 'nameBoard';
   private alive$: Subject<void> = new Subject<void>();

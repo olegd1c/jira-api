@@ -10,7 +10,7 @@ export class LoginComponent implements OnInit {
     loginForm: FormGroup;
     loading = false;
     submitted = false;
-    returnUrl: string = '/main/points';
+    returnUrl = '/main/points';
 
     constructor(
         private formBuilder: FormBuilder,
@@ -55,7 +55,6 @@ export class LoginComponent implements OnInit {
 
         this.loading = true;
         this.authenticationService.login(this.f.username.value, this.f.password.value)
-            //.pipe(first())
             .then(
                 data => {
                     if (data) {

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
-import { Params } from "@app/params";
+import { Params } from '@app/params';
 
 @Component({
   selector: 'app-announcements',
@@ -17,8 +17,9 @@ export class AnnouncementsComponent implements OnInit {
   confirmList = Params.confirmList;
   executorList = Params.executorList;
   links = '';
+  sending = false;
 
-  get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray };
+  get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray; }
 
   loading = false;
 
@@ -68,7 +69,7 @@ export class AnnouncementsComponent implements OnInit {
             this.tasksForm.push(this.initTaskForm(result));
           }
 
-          this.links = result['links'];
+          this.links = result?.links;
 
           this.searchForm.reset();
           this.loading = false;
@@ -99,6 +100,7 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   sendAnnouncement() {
+    this.sending = true;
     this.taskService.sendAnnouncement({message: this.announcementText}).then(
       result => {
         if (result) {
@@ -109,7 +111,10 @@ export class AnnouncementsComponent implements OnInit {
           }
           this.announcementText = '';
         }
-      });
+        this.sending = false;
+      }).catch(() => {
+        this.sending = true;
+    });
 
   }
 
@@ -121,22 +126,22 @@ export class AnnouncementsComponent implements OnInit {
     const data = this.announcementForm.value;
     const date = data.date ? new Date(data.date).toLocaleString() : '';
     this.announcementText =
-      'Планируемая дата выливки ' + date + "\n\n";
+      'Планируемая дата выливки ' + date + '\n\n';
     data.tasks.map(item => {
       this.announcementText = this.announcementText +
       item.link + ' ' +
-      item.summary + "\n" +
-      'Исполнитель: ' + item.devName + "\n" +
-      'Тестировщик: ' + item.testName + "\n" +
-      'Подтверждение бизнеса: ' + item.confirm + "\n";
+      item.summary + '\n' +
+      'Исполнитель: ' + item.devName + '\n' +
+      'Тестировщик: ' + item.testName + '\n' +
+      'Подтверждение бизнеса: ' + item.confirm + '\n';
     });
     this.announcementText = this.announcementText +
-      'Выливает: ' + data.executor + "\n\n";
+      'Выливает: ' + data.executor + '\n\n';
   }
 
   changeConfirm(event) {
 
-    this.tasksForm['controls'].map(elem => {
+    this.tasksForm.controls.map(elem => {
       if (!elem.get('confirm').value) {
         elem.patchValue({confirm: event.target.value});
       }

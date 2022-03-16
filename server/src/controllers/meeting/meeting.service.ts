@@ -1,5 +1,5 @@
 import { Model } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {Injectable, Logger, NotFoundException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Meeting, MeetingDocument } from './meeting.schema';
 import { PostDto } from './dto/post.dto';
@@ -7,6 +7,8 @@ import { getWeekType, WeekType } from '@app/utils/utils';
  
 @Injectable()
 class MeetingService {
+  private readonly logger = new Logger(MeetingService.name);
+
   constructor(@InjectModel(Meeting.name) private meetingModel: Model<MeetingDocument>) {}
 
   async findAll() {
