@@ -1,10 +1,11 @@
 export enum ParentFilter {
-  point = 'point'
+  point = 'point',
+  announcement = 'announcement'
 }
 
 export interface ParamsFilter {
   boardId: number;
-  sprints: number[];
+  sprints?: number[];
   statusesTask?: string[];
 }
 

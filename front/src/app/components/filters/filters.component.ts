@@ -118,9 +118,13 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
 
   onChangeBoard(id) {
     this.boarId = id;
-    this.getSprints({boardId: id});
-    this.sprints = [];
-    this.search.emit(null);
+    if (this.parent === this.parentFilter.announcement) {
+      this.search.emit({boardId: id});
+    } else {
+      this.getSprints({boardId: id});
+      this.sprints = [];
+      this.search.emit(null);
+    }
   }
 
   addSprints() {

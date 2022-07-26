@@ -156,6 +156,26 @@ export class JiraService {
         return tasks;
     }
 
+    async getTaskForBuild(params: {boardId: number}): Promise<any> {
+
+        if (!jiraApi) {
+            const result = await this.initJiraApiBot();
+
+            if (!result) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
+        }
+        let tasks: Task[];
+        const strints = await this.getAllSprints({boardId: params.boardId, state: StateSprint.active});
+        if (strints && strints.values && strints.values.length) {
+            const sprintId = strints.values[0]['id'];
+            const paramsTasks = {boardId: params.boardId, sprintsId: [sprintId], statusesTask: ['ForBuild']};
+            tasks = await this.getAllTasks(paramsTasks, true);
+        }
+
+        return tasks;
+    }
+
     private parsePointTasks(tasks: Task[]) {
 
         const temp: SprintPoint[] = [];
@@ -234,7 +254,7 @@ export class JiraService {
         return { temp, devAvg, testAvg, reviewerAvg };
     }
 
-    async getAllTasks(query): Promise<any> {
+    async getAllTasks(query, announcement = false): Promise<any> {
         const boardId = query.boardId;
         const sprintId = query.sprintId;
         const sprintsId = query.sprintsId;
@@ -281,18 +301,7 @@ export class JiraService {
             const fields = 'key';
             return jiraApi.getIssuesForBoard(boardId, 0, 1000, jql).then(async result => {
 
-                const items: any[] = await this.parseTasks(result.issues);
-                //items.sort((a,b) => (a.sprintName > b.sprintName) ? 1 : 0);
-                /*
-                items.sort(function(a, b){
-                  var nameA=a.sprintName.toLowerCase(), nameB=b.sprintName.toLowerCase()
-                  if (nameA < nameB) //sort string ascending
-                      return -1 
-                  if (nameA > nameB)
-                      return 1
-                  return 0 //default return value (no sorting)
-                });
-                */
+                const items: any[] = await this.parseTasks(result.issues, announcement);
                 return items;
             })
                 .catch(function (err) {
@@ -309,20 +318,26 @@ export class JiraService {
         }
     }
 
-    private async parseTasks(result: any): Promise<any> {
+    private async parseTasks(result: any, announcement = false): Promise<any> {
         return new Promise(async (resolve, reject) => {
             let items = [];
             let i = 1;
 
             await Promise.all(result.map(async (item) => {
-                const data = await this.getIssue(item.key);
-                const reviewers = [];
-                if (item.fields[FieldTask.reviewer]) {
-                    item.fields[FieldTask.reviewer].forEach(element => {
-                        reviewers.push(element.key);
-                    });
+                let result;
+
+                if (announcement) {
+                    result = await this.getIssueAnnouncement(item.key);
+                } else {
+                    const data = await this.getIssue(item.key);
+                    const reviewers = [];
+                    if (item.fields[FieldTask.reviewer]) {
+                        item.fields[FieldTask.reviewer].forEach(element => {
+                            reviewers.push(element.key);
+                        });
+                    }
+                    result = Object.assign({ id: item.id, key: item.key, summary: item.summary, reviewers: reviewers }, data);
                 }
-                result = Object.assign({ id: item.id, key: item.key, summary: item.summary, reviewers: reviewers }, data);
                 items.push(result);
                 i++;
             }));

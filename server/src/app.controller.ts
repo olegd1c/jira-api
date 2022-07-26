@@ -4,7 +4,6 @@ import { GetUser } from './auth/user/get-user.decorator';
 import { User } from './models/user.model';
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 import { TelegramBotService } from './services/telegram-bot.service';
-import { Observable } from 'rxjs';
 import { Permissions } from './shared/models/permission.enum';
 
 export const MetaPermissions = (...permissions: string[]) => SetMetadata('permissions', permissions);
@@ -48,40 +47,12 @@ export class AppController {
 
   @MetaPermissions(Permissions.view)
   @UseGuards(JwtAuthGuard)
-  @Get('tasks')
-  getTasks(
-    @Query() query
-  ): Promise<any> {
-
-    return this.jiraService.getAllTasks(query);
-  }
-
-  @MetaPermissions(Permissions.view)
-  @UseGuards(JwtAuthGuard)
-  @Get('pointsByDev')
+  @Get('points-by-dev')
   getPointsByDev(
     @Query() query
   ): Promise<any> {
 
     return this.jiraService.getPointByDev(query);
-  }
-
-  @MetaPermissions(Permissions.view)
-  @UseGuards(JwtAuthGuard)
-  @Get('task/:key')
-  getTask(
-    @Param('key') key: string
-  ): Promise<any> {
-    return this.jiraService.getIssue(key);
-  }
-
-  @MetaPermissions(Permissions.view)
-  @UseGuards(JwtAuthGuard)
-  @Get('task-announcement/:key')
-  getTaskAnnouncement(
-    @Param('key') key: string
-  ): Promise<any> {
-    return this.jiraService.getIssueAnnouncement(key);
   }
 
   @MetaPermissions(Permissions.notify)
@@ -94,7 +65,6 @@ export class AppController {
   ): Promise<any> {
     return this.telegramBotService.sendMessage(data, user);
   }
-
   @MetaPermissions(Permissions.notify)
   @UseGuards(JwtAuthGuard)
   @Post('update-story-points')

@@ -20,9 +20,10 @@ import CasesService from './controllers/case/case.service';
 import MeetingService from './controllers/meeting/meeting.service';
 import UserService from './controllers/user/user.service';
 import TeamService from './controllers/team/team.service';
+import TasksModule from './controllers/task/task.module';
 
 ConfigModule.forRoot({
-  envFilePath: ['.env.local', '.env'], 
+  envFilePath: ['.env.local', '.env'],
 })
 
 @Module({
@@ -56,7 +57,8 @@ ConfigModule.forRoot({
     CasesModule,
     MeetingModule,
     UserModule,
-    TeamModule
+    TeamModule,
+    TasksModule
   ],
   controllers: [AppController],
   providers: [

@@ -51,7 +51,7 @@ class TeamService {
     });
   }
 
-  async findForReview() {
+  async findForReview(): Promise<TeamDocument[]> {
     return this.model.find({checkReview: true, reviewChatId: {$ne:null}}).populate('users');
   }
   

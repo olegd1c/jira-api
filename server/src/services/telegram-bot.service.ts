@@ -1,14 +1,9 @@
-import CasesService from '@app/controllers/case/case.service';
 import {User} from '@app/models/user.model';
 import {HttpService, Injectable} from '@nestjs/common';
 import {ConfigService} from '@nestjs/config';
 import {CronJob} from 'cron';
 import {Task} from '@shared_models/task.model';
 import {Meeting} from '@app/controllers/meeting/meeting.schema';
-import {JiraService} from '@services/jira.service';
-import UserService from '@app/controllers/user/user.service';
-import TeamService from '@app/controllers/team/team.service';
-import MeetingService from '@app/controllers/meeting/meeting.service';
 import {User as UserMeeting} from '@app/controllers/user/user.schema';
 import { Team } from '@app/controllers/team/team.schema';
 
@@ -20,11 +15,6 @@ export class TelegramBotService {
     constructor(
         private httpService: HttpService,
         private configService: ConfigService,
-        private casesService: CasesService,
-        private meetingService: MeetingService,
-        private jiraService: JiraService,
-        private userService: UserService,
-        private teamService: TeamService,
     ) {
 
     }
@@ -64,15 +54,13 @@ export class TelegramBotService {
         return result && result.status == 200 ? true : false;
     }
 
-    async sendReminderCron(): Promise<any> {
+    async sendReminderCron(meetings): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         //const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
         //const data = await import('../data/tasks.json');
-        const data = await this.meetingService.findCurrent();
-
-        data.forEach((item) => {
+        meetings.forEach((item) => {
 
             const cr = new CronJob(item.cronTime, () => {
                 this.sendNotify(item, botId, token);
@@ -102,13 +90,11 @@ export class TelegramBotService {
         this.httpService.get(apiUrl, {headers: headersRequest}).subscribe();
     }
 
-    async sendReminderMeetings(): Promise<any> {
+    async sendReminderMeetings(meetings): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
-        const data = await this.meetingService.findCurrent();
-
-        data.forEach((item) => {
+        meetings.forEach((item) => {
 
             const cr = new CronJob(item.cronTime, () => {
                 this.sendNotify(item, botId, token);
@@ -116,11 +102,10 @@ export class TelegramBotService {
         });
     }
 
-    async sendReminderReview(): Promise<any> {
+    /*
+    async sendReminderReview(teams: TeamDocument[]): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
-
-        const teams = await this.teamService.findForReview();
 
         teams.forEach(item => {
                 this.findTasks(item, botId, token);
@@ -130,6 +115,21 @@ export class TelegramBotService {
 
     private async findTasks(elem: Team, botId: string, token: string) {
         const tasks: Task[] = await this.jiraService.getTaskForReview(elem.boardId);
+
+        if (tasks.length) {
+
+            const data: Meeting[] = this.parseReviewTasks(tasks, elem.users);
+
+            data.forEach((item) => {
+                this.sendNotify(item, botId, token, elem.reviewChatId);
+            });
+        }
+    }
+    */
+
+    async sendNotifyTasks(elem: Team, tasks: Task[]) {
+        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
+        const botId = this.configService.get('TELEGRAM_BOT_ID');
 
         if (tasks.length) {
 

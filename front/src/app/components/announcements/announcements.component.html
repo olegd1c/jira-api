@@ -1,30 +1,58 @@
 <p class="well lead">Анонс виливки задач</p>
 <div class="container">
-    <div class="row">
-        <div class="col-sm-8 contact-form">
-            <form [formGroup]="searchForm" (ngSubmit)="search()" class="form" role="form">
-                <div class="row">
-                    <div class="col-xs-9 col-md-9 form-group">
-                        <input [attr.disabled]="loading ? '' : null" formControlName="number" class="form-control"
-                            placeholder="Номер задачі" type="text" required autofocus />
+    <div class="row border border-primary mt-1 mb-3 p-2">
+        <div class="col-sm-8 border-primary border-right">
+            <app-filters (search)="onSearch($event)" [parent]="parentFilter.announcement"></app-filters>
+            <h5>Задачі ForBuild в активному спрінті</h5>
+            <table class="table table-striped w-auto">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col" class="w-30">Номер задачі</th>
+                        <th scope="col">Опис</th>
+                        <th scope="col">Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let task of taskForBuild; let i=index">
+                        <tr>
+                            <th scope="row">{{ i + 1 }}</th>
+                            <td><a [href]="task.link" target="_blank" rel="noopener">{{task.key}}</a></td>
+                            <td>{{task?.summary}}</td>
+                            <td>
+                                <button type="button" (click)="addToForm(task)" class="btn btn-delete">Додати</button>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-5"></span>
+        </div>
+        <div class="col">
+            <div class="col-sm-12 contact-form">
+                <form [formGroup]="searchForm" (ngSubmit)="search()" class="form" role="form">
+                    <div class="row">
+                        <div class="col-xs-9 col-md-9 form-group">
+                            <input [attr.disabled]="loading ? '' : null" formControlName="number" class="form-control"
+                                placeholder="Номер задачі" type="text" required autofocus />
+                        </div>
                     </div>
-                </div>
-
-              <div class="row">
-                <div class="col-xs-9 col-md-9 form-group" *ngIf="links">
-                  Links: {{links}}
-                </div>
-              </div>
-
-                <div class="row">
-                    <div class="col-xs-12 col-md-12 form-group">
-                        <button [disabled]="!searchForm.valid" class="btn btn-primary pull-right" type="submit">Пошук</button>
+                    <div class="row">
+                        <div class="col-xs-9 col-md-9 form-group" *ngIf="links">
+                            Links: {{links}}
+                        </div>
                     </div>
-                </div>
-            </form>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-md-12 form-group">
+                            <button [disabled]="!searchForm.valid" class="btn btn-primary pull-right"
+                                type="submit">Пошук</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-    <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
 </div>
 
 <div>
@@ -42,16 +70,16 @@
             </div>
         </div>
         <div class="row">
-          <div class='col-sm-6'>
+            <div class='col-sm-6'>
                 <div class="form-group">
                     <div class='input-group'>
-                      <select formControlName="executor" class="form-control">
-                        <option disabled [value]="null">Виберіть виконавця</option>
-                        <!--option value=" " selected>Виберіть виконавця</option-->
-                        <option *ngFor="let itemC of executorList" [value] = "itemC">
-                          {{itemC}}
-                        </option>
-                      </select>
+                        <select formControlName="executor" class="form-control">
+                            <option disabled [value]="null">Виберіть виконавця</option>
+                            <!--option value=" " selected>Виберіть виконавця</option-->
+                            <option *ngFor="let itemC of executorList" [value]="itemC">
+                                {{itemC}}
+                            </option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -62,7 +90,7 @@
                 <thead>
                     <tr>
                         <th scope="col">#</th>
-                        <th scope="col" class="w-50">Номер задачі</th>
+                        <th scope="col" class="w-30">Номер задачі</th>
                         <th scope="col">Опис</th>
                         <th scope="col">Розробник</th>
                         <th scope="col">Тестувальник</th>
@@ -74,14 +102,15 @@
                     <ng-container *ngFor="let task of tasksForm.controls; let i=index">
                         <tr [formGroupName]="i">
                             <th scope="row">{{ i + 1 }}</th>
-                            <td><a [href]="task.get('link').value" target="_blank" rel="noopener">{{task.get('key').value}}</a></td>
+                            <td><a [href]="task.get('link').value" target="_blank"
+                                    rel="noopener">{{task.get('key').value}}</a></td>
                             <td>{{task.get('summary').value}}</td>
                             <td>{{task.get('devName').value}}</td>
                             <td>{{task.get('testName').value}}</td>
                             <td>
                                 <select formControlName="confirm" (change)="changeConfirm($event)">
                                     <option></option>
-                                    <option *ngFor="let itemC of confirmList" [value] = "itemC">
+                                    <option *ngFor="let itemC of confirmList" [value]="itemC">
                                         {{itemC}}
                                     </option>
                                 </select>
@@ -98,11 +127,12 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-md-12 form-group">
-                <button [disabled]="sending || !announcementForm.valid" class="btn btn-primary pull-right" type="submit">Відправити
+                <button [disabled]="sending || !announcementForm.valid" class="btn btn-primary pull-right"
+                    type="submit">Відправити
                     анонс</button>
             </div>
         </div>
     </form>
 
-    <textarea disabled cols="50" rows="15" [value]="announcementText"></textarea>
+    <textarea disabled cols="80" rows="15" [value]="announcementText"></textarea>
 </div>

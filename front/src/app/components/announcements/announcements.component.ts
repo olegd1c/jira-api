@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
 import { Params } from '@app/params';
+import { ParamsFilter, ParentFilter } from '@models/filter.model';
 
 @Component({
   selector: 'app-announcements',
@@ -18,6 +19,8 @@ export class AnnouncementsComponent implements OnInit {
   executorList = Params.executorList;
   links = '';
   sending = false;
+  taskForBuild = [];
+  parentFilter = ParentFilter;
 
   get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray; }
 
@@ -49,9 +52,9 @@ export class AnnouncementsComponent implements OnInit {
     this.prepareText();
   }
 
-  search() {
+  search(number?: string) {
     this.loading = true;
-    const numberTask: string = this.searchForm.controls.number.value;
+    const numberTask: string = this.searchForm.controls.number.value || number;
     let numbers = [];
 
     if (numberTask.split(';').length) {
@@ -63,11 +66,7 @@ export class AnnouncementsComponent implements OnInit {
     numbers.map(n => {
       this.taskService.getTaskAnnouncement({ number: n })
         .then(result => {
-          const tempV: any[] = this.tasksForm.value;
-          const fItem = tempV.find(item => item.key ===  result.key);
-          if (!fItem) {
-            this.tasksForm.push(this.initTaskForm(result));
-          }
+          this.addToForm(result);
 
           this.links = result?.links;
 
@@ -75,6 +74,14 @@ export class AnnouncementsComponent implements OnInit {
           this.loading = false;
         }).catch(() => this.loading = false);
     });
+  }
+
+  addToForm(result: any) {
+    const tempV: any[] = this.tasksForm.value;
+    const fItem = tempV.find(item => item.key === result.key);
+    if (!fItem) {
+      this.tasksForm.push(this.initTaskForm(result));
+    }
   }
 
   private initTaskForm(item: TaskAnnouncement): FormGroup {
@@ -145,6 +152,26 @@ export class AnnouncementsComponent implements OnInit {
       if (!elem.get('confirm').value) {
         elem.patchValue({confirm: event.target.value});
       }
+    });
+  }
+
+  onSearch($event: ParamsFilter) {
+    if ($event) {
+      const params: ParamsFilter = $event;
+      this.getTasksForBuild(params);
+    } else {
+      this.taskForBuild = [];
+    }
+  }
+
+  private getTasksForBuild(params: ParamsFilter) {
+    this.loading = true;
+    this.taskService.getTasksForBuild(params).then(result => {
+      this.taskForBuild = result;
+      this.loading = false;
+    }).catch(() => {
+      this.taskForBuild = [];
+      this.loading = false;
     });
   }
 
