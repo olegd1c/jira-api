@@ -6,5 +6,6 @@ export enum FieldTask {
     pointTest = 'customfield_10205',
     pointStory = 'customfield_10130',
     summary = 'summary',
-    comment = 'comment'
+    comment = 'comment',
+    fixVersions = 'fixVersions'
 }

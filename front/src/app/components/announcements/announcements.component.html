@@ -10,6 +10,7 @@
                         <th scope="col">#</th>
                         <th scope="col" class="w-30">Номер задачі</th>
                         <th scope="col">Опис</th>
+                        <th scope="col">Реліз</th>
                         <th scope="col">Дії</th>
                     </tr>
                 </thead>
@@ -19,8 +20,9 @@
                             <th scope="row">{{ i + 1 }}</th>
                             <td><a [href]="task.link" target="_blank" rel="noopener">{{task.key}}</a></td>
                             <td>{{task?.summary}}</td>
+                            <td>{{task?.release}}</td>
                             <td>
-                                <button type="button" (click)="addToForm(task)" class="btn btn-delete">Додати</button>
+                                <button *ngIf="!task?.isAdd" type="button" (click)="addToForm(task)" class="btn btn-delete">Додати</button>
                             </td>
                         </tr>
                     </ng-container>
@@ -116,7 +118,7 @@
                                 </select>
                             </td>
                             <td>
-                                <button type="button" (click)="deleteTask(i)" class="btn btn-delete">Видалити</button>
+                                <button type="button" (click)="deleteTask(i, task.get('key').value)" class="btn btn-delete">Видалити</button>
                             </td>
                         </tr>
                     </ng-container>

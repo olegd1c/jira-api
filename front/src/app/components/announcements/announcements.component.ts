@@ -76,11 +76,10 @@ export class AnnouncementsComponent implements OnInit {
     });
   }
 
-  addToForm(result: any) {
-    const tempV: any[] = this.tasksForm.value;
-    const fItem = tempV.find(item => item.key === result.key);
-    if (!fItem) {
-      this.tasksForm.push(this.initTaskForm(result));
+  addToForm(task: any) {
+    if (!task.isAdd) {
+      this.tasksForm.push(this.initTaskForm(task));
+      task.isAdd = true;
     }
   }
 
@@ -125,7 +124,8 @@ export class AnnouncementsComponent implements OnInit {
 
   }
 
-  deleteTask(index) {
+  deleteTask(index, key) {
+    this.taskForBuild.filter(item => item.key === key)[0].isAdd = false;
     this.tasksForm.removeAt(index);
   }
 

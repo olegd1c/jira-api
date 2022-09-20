@@ -166,10 +166,11 @@ export class JiraService {
             }
         }
         let tasks: Task[];
-        const strints = await this.getAllSprints({boardId: params.boardId, state: StateSprint.active});
-        if (strints && strints.values && strints.values.length) {
-            const sprintId = strints.values[0]['id'];
-            const paramsTasks = {boardId: params.boardId, sprintsId: [sprintId], statusesTask: ['ForBuild']};
+        const sprints = await this.getAllSprints({boardId: params.boardId, state: StateSprint.active});
+        if (sprints && sprints.values && sprints.values.length) {
+            let paramSprints = [];
+            sprints.values.map( item => {paramSprints.push(item.id)});
+            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild']};
             tasks = await this.getAllTasks(paramsTasks, true);
         }
 
@@ -373,6 +374,13 @@ export class JiraService {
 
                     const fieldTest = issue.fields[FieldTask.tester];
                     const summary = issue.fields['summary'];
+                    let release = '';
+                    if ((issue.fields[FieldTask.fixVersions] && issue.fields[FieldTask.fixVersions].length)) {
+                        issue.fields[FieldTask.fixVersions].map(item => {
+                            release = release + item.name + ';';
+                            });
+                    }
+
                     const key = issue['key'];
                     const link = getLinkTask(key);
 
@@ -390,7 +398,7 @@ export class JiraService {
                         });
                     }    
 
-                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links};
+                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links, release: release};
                 } else {
                     console.log('не найден: ' + key);
                 }
