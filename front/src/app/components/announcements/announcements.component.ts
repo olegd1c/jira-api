@@ -133,17 +133,17 @@ export class AnnouncementsComponent implements OnInit {
     const data = this.announcementForm.value;
     const date = data.date ? new Date(data.date).toLocaleString() : '';
     this.announcementText =
-      'Планируемая дата выливки ' + date + '\n\n';
+      'Запланована дата виливки ' + date + '\n\n';
     data.tasks.map(item => {
       this.announcementText = this.announcementText +
       item.link + ' ' +
       item.summary + '\n' +
-      'Исполнитель: ' + item.devName + '\n' +
-      'Тестировщик: ' + item.testName + '\n' +
-      'Подтверждение бизнеса: ' + item.confirm + '\n';
+      'Виконавець: ' + item.devName + '\n' +
+      'Тестувальник: ' + item.testName + '\n' +
+      'Підтвердження бізнесу: ' + item.confirm + '\n';
     });
     this.announcementText = this.announcementText +
-      'Выливает: ' + data.executor + '\n\n';
+      'Виливає: ' + data.executor + '\n\n';
   }
 
   changeConfirm(event) {

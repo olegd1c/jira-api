@@ -170,10 +170,10 @@ export class JiraService {
         if (sprints && sprints.values && sprints.values.length) {
             let paramSprints = [];
             sprints.values.map( item => {paramSprints.push(item.id)});
-            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild']};
+            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild', 'InBuild']};
             tasks = await this.getAllTasks(paramsTasks, true);
         }
-
+        sortList(tasks,'release');
         return tasks;
     }
 
@@ -536,9 +536,9 @@ function countAvg(avg, useTotal = false) {
     }
 }
 
-function sortList(list, ) {
+function sortList(list, nameField = 'name') {
     list.sort(function(a, b){
-        var nameA=a.name.toLowerCase(), nameB=b.name.toLowerCase()
+        const nameA=a[nameField].toLowerCase(), nameB=b[nameField].toLowerCase();
         if (nameA < nameB) //sort string ascending
             return -1
         if (nameA > nameB)

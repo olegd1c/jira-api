@@ -1,6 +1,6 @@
-import { User } from '@app/mongo/schemas/user.shema';
 import { WeekType } from '@app/utils/utils';
 import { IsNotEmpty } from 'class-validator';
+import { StatusMeeting } from "@app/controllers/meeting/meeting.schema";
 
 
 export class PostDto {
@@ -18,4 +18,7 @@ export class PostDto {
 
     @IsNotEmpty()
     weekType: WeekType;
+
+    @IsNotEmpty()
+    status: StatusMeeting;
 }

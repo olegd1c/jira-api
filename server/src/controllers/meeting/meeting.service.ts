@@ -56,7 +56,6 @@ class MeetingService {
     }
   }
 
-
   async deleteAll() {
     (await this.meetingModel.find()).forEach(item => {
       this.delete(item.id);

@@ -7,6 +7,11 @@ import { User } from '../user/user.schema';
 
 export type MeetingDocument = Meeting & Document;
 
+export enum StatusMeeting {
+  disabled = 0,
+  active = 1
+}
+
 @Schema({ toJSON: { virtuals: true, getters: true }, toObject: { virtuals: true, getters: true }})
 export class Meeting {
   @Prop()
@@ -23,6 +28,9 @@ export class Meeting {
 
   @Prop()
   weekType?: WeekType;
+
+  @Prop()
+  status?: StatusMeeting;
 
   @Type(() => User)
   users?: User[];

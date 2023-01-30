@@ -24,7 +24,7 @@ export class TelegramBotService {
         const chatId = this.configService.get('TELEGRAM_CHAT_ID');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
-        const message = data.message + 'Автор сообщения: ' + user.displayName + "\n\n";
+        const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
 
         let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=-${chatId}&text=${message}`;
         apiUrl = encodeURI(apiUrl);
