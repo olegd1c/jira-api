@@ -170,7 +170,7 @@ export class JiraService {
         if (sprints && sprints.values && sprints.values.length) {
             let paramSprints = [];
             sprints.values.map( item => {paramSprints.push(item.id)});
-            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild', 'InBuild']};
+            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild', 'InBuild', 'ReleaseTesting', 'ReleaseTested']};
             tasks = await this.getAllTasks(paramsTasks, true);
         }
         sortList(tasks,'release');
