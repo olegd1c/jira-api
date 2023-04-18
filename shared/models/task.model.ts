@@ -58,4 +58,5 @@ export interface TaskAnnouncement {
     key: string;
     links?: string;
     release: string;
+    info?: string;
 }

@@ -7,5 +7,6 @@ export enum FieldTask {
     pointStory = 'customfield_10130',
     summary = 'summary',
     comment = 'comment',
-    fixVersions = 'fixVersions'
+    fixVersions = 'fixVersions',
+    labels = 'labels'
 }

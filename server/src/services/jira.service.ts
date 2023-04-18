@@ -388,7 +388,20 @@ export class JiraService {
 
                     const issuelinks = issue.fields['issuelinks'];
                     let links = '';
-                    const buildLabel = issue.fields['labels'].filter(l => l == 'build');
+                    let info = '';
+                    const findLabelMarket = issue.fields['labels'].filter(l => l == 'common_affected_market');
+                    const findLabelRest = issue.fields['labels'].filter(l => l == 'common_affected_rest');
+                    if (findLabelMarket.length > 0 || findLabelRest.length > 0) {
+                        info = '!!! Зміни в Common зачіпають';
+                        if (findLabelMarket.length > 0) {
+                            info = info + ' Market,';
+                        }
+                        if (findLabelRest.length > 0) {
+                            info = info + ' Rest,';
+                        }
+                        info = info.substring(0, info.length - 1);
+                    }
+                    
                     
                     if (issuelinks) {
                         issuelinks.map(t => {
@@ -398,7 +411,7 @@ export class JiraService {
                         });
                     }    
 
-                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links, release: release};
+                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links, release: release, info: info};
                 } else {
                     console.log('не найден: ' + key);
                 }

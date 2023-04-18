@@ -101,6 +101,9 @@ export class AnnouncementsComponent implements OnInit {
       ]],
       summary: [item.summary, [
         Validators.required
+      ]],
+      info: [item.info, [
+        
       ]]
     });
   }
@@ -125,7 +128,10 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   deleteTask(index, key) {
-    this.taskForBuild.filter(item => item.key === key)[0].isAdd = false;
+    const task = this.taskForBuild.filter(item => item.key === key);
+    if (task.length) {
+      task[0].isAdd = false;
+    }  
     this.tasksForm.removeAt(index);
   }
 
@@ -138,6 +144,7 @@ export class AnnouncementsComponent implements OnInit {
       this.announcementText = this.announcementText +
       item.link + ' ' +
       item.summary + '\n' +
+      (item.info ? (item.info + '\n') : '') +
       'Виконавець: ' + item.devName + '\n' +
       'Тестувальник: ' + item.testName + '\n' +
       'Підтвердження бізнесу: ' + item.confirm + '\n';
