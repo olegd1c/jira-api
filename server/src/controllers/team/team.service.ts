@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Team, TeamDocument } from './team.schema';
 import { PostDto } from './dto/post.dto';
+import { StatusTeam } from "@shared_models/team.model";
  
 @Injectable()
 class TeamService {
@@ -52,7 +53,7 @@ class TeamService {
   }
 
   async findForReview(): Promise<TeamDocument[]> {
-    return this.model.find({checkReview: true, reviewChatId: {$ne:null}}).populate('users');
+    return this.model.find({checkReview: true, status: StatusTeam.active, reviewChatId: {$ne:null}}).populate('users');
   }
   
 }

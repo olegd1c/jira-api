@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Meeting, MeetingDocument } from './meeting.schema';
 import { PostDto } from './dto/post.dto';
 import { getWeekType, WeekType } from '@app/utils/utils';
+import { StatusMeeting } from "@shared_models/meeting.model";
  
 @Injectable()
 class MeetingService {
@@ -15,13 +16,13 @@ class MeetingService {
     return (await this.meetingModel.find().populate('team'));
   }
 
-  async findCurrent() {
+  async findCurrent(): Promise<MeetingDocument[]> {
 
     const weekType = getWeekType();
     const currentDate = new Date();
     const currentTime = ('0'+currentDate.getHours()).slice(-2) + ':' + ('0'+currentDate.getMinutes()).slice(-2);
 
-    return this.meetingModel.find({ time: currentTime})
+    return this.meetingModel.find({ time: currentTime, status: StatusMeeting.active})
       .or([{ weekType: WeekType.all }, { weekType: weekType }]).populate('team').populate('users')
     ;
   }

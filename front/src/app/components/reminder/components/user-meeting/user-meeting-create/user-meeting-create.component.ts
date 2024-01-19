@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import {UserMeetingService} from '@app/components/reminder/components/user-meeting/user-meeting.service';
 import {TeamService} from '@app/components/reminder/components/team/team.service';
+import { StatusUser } from '@shared_models/users.model';
 
 @Component({
   selector: 'app-user-meeting-create',
@@ -19,6 +20,7 @@ export class UserMeetingCreateComponent implements OnInit {
   userId;
   userCopyId;
   url = '/main/reminder/users';
+  statuses = [StatusUser.active, StatusUser.blocked];
 
   constructor(
     private service: UserMeetingService,
@@ -44,7 +46,8 @@ export class UserMeetingCreateComponent implements OnInit {
       name: [''],
       team: [''],
       jiraLogin: [''],
-      telegramLogin: ['']
+      telegramLogin: [''],
+      status: [''],
     });
   }
 
@@ -85,7 +88,7 @@ export class UserMeetingCreateComponent implements OnInit {
     });
   }
 
-  Cancel(){
+  cancel(){
     this.router.navigate([this.url]);
   }
 

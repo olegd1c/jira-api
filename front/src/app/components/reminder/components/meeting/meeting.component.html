@@ -17,6 +17,7 @@
       <th class="col">Команди</th>
       <th class="col">Дні запуску</th>
       <th class="col">Тижні запуску</th>
+      <th class="col">Статус</th>
       <th class="col">Дії</th>
     </tr>
 
@@ -26,6 +27,7 @@
       <td class="col">{{item.team?.name}}</td>
       <td class="col">{{tmpDaysCron[item.cronTime]}}</td>
       <td class="col">{{tmpWeeksType[item.weekType]}}</td>
+      <td class="col">{{item.status}}</td>
       <td class="col">
         <div class="btn-group">
           <button (click)="editMeeting(item)" type="button" class="btn btn-outline-secondary">

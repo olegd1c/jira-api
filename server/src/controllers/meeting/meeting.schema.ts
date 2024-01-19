@@ -4,13 +4,10 @@ import { Type } from 'class-transformer';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Team } from '../team/team.schema';
 import { User } from '../user/user.schema';
+import { StatusMeeting } from "@shared_models/meeting.model";
 
 export type MeetingDocument = Meeting & Document;
 
-export enum StatusMeeting {
-  disabled = 0,
-  active = 1
-}
 
 @Schema({ toJSON: { virtuals: true, getters: true }, toObject: { virtuals: true, getters: true }})
 export class Meeting {

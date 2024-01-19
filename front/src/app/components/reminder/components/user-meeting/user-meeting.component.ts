@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 
 import {UserMeetingService} from '@app/components/reminder/components/user-meeting/user-meeting.service';
+import { IUser } from '@shared_models/users.model';
 
 @Component({
   selector: 'app-user-meeting',
@@ -11,7 +12,7 @@ import {UserMeetingService} from '@app/components/reminder/components/user-meeti
 export class UserMeetingComponent implements OnInit {
 
   loading = false;
-  items;
+  items: IUser[] = [];
   url = '/main/reminder/users';
 
   constructor(

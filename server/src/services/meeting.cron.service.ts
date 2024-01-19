@@ -16,6 +16,7 @@ export class MeetingCronService {
     async handleCron() {
         //this.logger.debug('MeetingCronService when the current second is 1');
         const meetings = await this.meetingService.findCurrent();
+        //this.logger.debug(JSON.stringify(meetings));
         this.telegramBotService.sendReminderMeetings(meetings).then(r => {});
     }
     

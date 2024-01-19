@@ -16,6 +16,7 @@
       <th class="col">Jira login</th>
       <th class="col">Telegram login</th>
       <th class="col">Команда</th>
+      <th class="col">Статус</th>
       <th class="col">Дії</th>
     </tr>
 
@@ -24,6 +25,7 @@
       <td class="col">{{item.jiraLogin}}</td>
       <td class="col">{{item.telegramLogin}}</td>
       <td class="col">{{item.team?.name}}</td>
+      <td class="col">{{item.status}}</td>
       <td class="col">
         <div class="btn-group">
           <button (click)="editItem(item)" type="button" class="btn btn-outline-secondary">

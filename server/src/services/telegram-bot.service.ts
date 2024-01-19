@@ -1,11 +1,12 @@
-import {User} from '@app/models/user.model';
-import {HttpService, Injectable} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {CronJob} from 'cron';
-import {Task} from '@shared_models/task.model';
-import {Meeting} from '@app/controllers/meeting/meeting.schema';
-import {User as UserMeeting} from '@app/controllers/user/user.schema';
+import { User } from '@app/models/user.model';
+import { HttpService, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { CronJob } from 'cron';
+import { Task } from '@shared_models/task.model';
+import { Meeting, MeetingDocument } from '@app/controllers/meeting/meeting.schema';
+import { User as UserMeeting } from '@app/controllers/user/user.schema';
 import { Team } from '@app/controllers/team/team.schema';
+import { StatusUser } from "@shared_models/users.model";
 
 @Injectable()
 export class TelegramBotService {
@@ -90,7 +91,7 @@ export class TelegramBotService {
         this.httpService.get(apiUrl, {headers: headersRequest}).subscribe();
     }
 
-    async sendReminderMeetings(meetings): Promise<any> {
+    async sendReminderMeetings(meetings: MeetingDocument[]): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
@@ -176,12 +177,16 @@ export class TelegramBotService {
     }
 }
 
-function prepareMessage(item: { title: string; users?: UserMeeting[]; }) {
-    let mess = item.title + "\n";
-    
-    item.users && item.users.map(u => {
-        mess = mess + u.name + ( u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
-    });
+function prepareMessage(item: Meeting) {
+    let mess = '';
+    const _users = item.users.filter(user => {user.status === StatusUser.active});
+    if (_users.length > 0) {
+        mess = item.title + "\n";
+
+        item.users && item.users.map(u => {
+            mess = mess + u.name + ( u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
+        });
+    }
 
     return mess;
 }

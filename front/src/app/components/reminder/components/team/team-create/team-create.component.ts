@@ -3,6 +3,7 @@ import {FormBuilder, FormGroup} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {TeamService} from '@app/components/reminder/components/team/team.service';
+import { StatusTeam } from '@shared_models/team.model';
 
 @Component({
   selector: 'app-team-create',
@@ -17,6 +18,7 @@ export class TeamCreateComponent implements OnInit {
 
   itemId;
   url = '/main/reminder/teams';
+  statuses = [StatusTeam.active, StatusTeam.blocked];
 
   constructor(
     private service: TeamService,
@@ -47,6 +49,8 @@ export class TeamCreateComponent implements OnInit {
       teamChatId: [''],
       boardId: [''],
       checkReview: [false],
+      checkMeeting: [false],
+      status: [''],
     });
   }
 

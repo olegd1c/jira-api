@@ -12,4 +12,7 @@ export class PostDto {
 
     @IsNotEmpty()
     telegramLogin: string;
+
+    @IsNotEmpty()
+    status: string;
 }

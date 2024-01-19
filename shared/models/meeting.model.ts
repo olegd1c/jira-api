@@ -31,3 +31,8 @@ export function daysCronArray() {
 
     return tmp;
 }
+
+export enum StatusMeeting {
+    active = 'Активна',
+    blocked = 'Заблокована'
+}

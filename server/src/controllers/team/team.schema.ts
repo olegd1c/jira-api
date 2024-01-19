@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document } from 'mongoose';
 import { User } from '../user/user.schema';
+import { StatusTeam } from '@shared_models/team.model';
 
 export type TeamDocument = Team & Document;
 
@@ -21,6 +22,12 @@ export class Team {
 
   @Prop()
   checkReview: boolean;
+
+  @Prop()
+  checkMeeting: boolean;
+
+  @Prop()
+  status: StatusTeam;
 
   @Type(() => User)
   users: User[];

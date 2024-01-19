@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 
 import {TeamService} from './team.service';
+import { ITeam } from '@shared_models/team.model';
 
 @Component({
   selector: 'app-team',
@@ -9,7 +10,7 @@ import {TeamService} from './team.service';
   styleUrls: ['./team.component.scss']
 })
 export class TeamComponent implements OnInit {
-  items;
+  items: ITeam[] = [];
   loading = false;
   url = '/main/reminder/teams';
 

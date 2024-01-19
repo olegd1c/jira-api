@@ -41,10 +41,26 @@
                     <div *ngIf="f.boardId.errors.required">ІД дошки обов"язковий</div>
                   </div>
                 </div>
+                <div class="form-group">
+                  <label for="status">Статус</label>
+                  <select formControlName="status" class="form-control">
+                    <option *ngFor="let value of statuses" [value] = "value">
+                      {{value}}
+                    </option>
+                  </select>
+                  <div *ngIf="submitted && f.team.errors" class="invalid-feedback">
+                    <div *ngIf="f.team.errors.required">Cтатус обов"язковий</div>
+                  </div>
+                </div>
                 <div class=" form-check">
                   <input type="checkbox" formControlName="checkReview"
                          class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkReview.errors }" />
                   <label class="form-check-label" for="checkReview">Запуск крона перевірки ревью</label>
+                </div>
+                <div class=" form-check">
+                  <input type="checkbox" formControlName="checkMeeting"
+                         class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkMeeting.errors }" />
+                  <label class="form-check-label" for="checkMeeting">Запуск крона перевірки зустрічей</label>
                 </div>
 
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">

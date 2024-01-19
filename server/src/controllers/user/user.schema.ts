@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Team } from '../team/team.schema';
+import { StatusUser } from "@shared_models/users.model";
 
 export type UserDocument = User & Document;
 
@@ -18,6 +17,9 @@ export class User {
 
   @Prop()
   telegramLogin: string;
+
+  @Prop()
+  status: StatusUser;
 }
 
 let UserSchema = SchemaFactory.createForClass(User);
