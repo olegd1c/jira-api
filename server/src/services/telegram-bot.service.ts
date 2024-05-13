@@ -1,5 +1,5 @@
 import { User } from '@app/models/user.model';
-import { HttpService, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CronJob } from 'cron';
 import { Task } from '@shared_models/task.model';
@@ -7,6 +7,7 @@ import { Meeting, MeetingDocument } from '@app/controllers/meeting/meeting.schem
 import { User as UserMeeting } from '@app/controllers/user/user.schema';
 import { Team } from '@app/controllers/team/team.schema';
 import { StatusUser } from "@shared_models/users.model";
+import { HttpService } from "@nestjs/axios";
 
 @Injectable()
 export class TelegramBotService {
