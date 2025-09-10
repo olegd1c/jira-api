@@ -1,9 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { NgModule} from '@angular/core';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { AppRoutingModule } from './app-routing.module';
+import { AppRoutingModule } from '@app/app.routes';
 import { AppComponent } from './app.component';
 import { HttpService } from './services/http.service';
 import { TaskService } from './services/task.service';
@@ -17,16 +17,22 @@ import {AuthGuard} from '@app/guards/auth.guard';
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
-  providers: [HttpService, TaskService, AlertService, AuthenticationService, AuthGuard],
+  providers: [
+    HttpService,
+    TaskService,
+    AlertService,
+    AuthenticationService,
+    AuthGuard,
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

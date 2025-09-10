@@ -10,7 +10,6 @@ export class TaskService extends BaseService {
     public url = 'tasks';
     private forBuild = 'for-build';
     private announcement = 'announcement';
-    
 
     constructor(protected service: HttpService) {
         super(service);
@@ -42,7 +41,7 @@ export class TaskService extends BaseService {
         return this.service._get();
     }
 
-    public getSprints(params: SprintSearch): Promise<any> {
+    public getSprints(params: SprintSearch): Observable<any> {
 
         let url = `sprints?boardId=${params.boardId}`;
         if (params.start) {
@@ -52,7 +51,20 @@ export class TaskService extends BaseService {
             url = url + `&pageSize=${params.pageSize}`;
         }
         this.service.setUrl(url);
-        return this.service._get();
+        return this.service._getObserv();
+    }
+
+    public getAllSprintsReversed(params: SprintSearch): Observable<any> {
+
+        let url = `sprints-all-reversed?boardId=${params.boardId}`;
+        if (params.start) {
+            url = url + `&start=${params.start}`;
+        }
+        if (params.pageSize) {
+            url = url + `&pageSize=${params.pageSize}`;
+        }
+        this.service.setUrl(url);
+        return this.service._getObserv();
     }
 
     public getBoards(name: string): Observable<any> {

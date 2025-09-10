@@ -8,26 +8,30 @@
         <h2 class="form-group">Статуси задач</h2>
       </div>
       <div class="row">
-        <div class="form-check form-check-inline" *ngFor="let status of statusesTask">
-          <input class="form-check-input" (change)="onChangeStatus(status.id, $event.target.checked)" name="{{ status.name }}" type="checkbox"
-                 id="{{status.name}}">
-          <label class="form-check-label" for="{{status.name}}">
-            {{status.name}}
-          </label>
+        <div class="form-check form-check-inline">
+          <ul class="list-group list-group-horizontal">
+            <li class="list-group-item" *ngFor="let status of statusesTask">
+              <input class="form-check-input" (change)="onChangeStatus(status.id, $event.target.checked)" name="{{ status.name }}" type="checkbox"
+                     id="{{status.name}}">
+              <label class="form-check-label" for="{{status.name}}">
+                {{status.name}}
+              </label>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
 
     <div class="contact-form">
       <h2 >Дошки</h2>
-      <div class="row">
+      <div class="row mb-2">
         <div class="form-group">
           <label for="nameBoard" class="label-block">Фільтр</label>
           <input type="text" [formControl]="nameBoard" maxlength="300" placeholder="Введіть назву дошки">
         </div>
       </div>
       <div class="row">
-        <div class="form-group">
+        <div class="form-group mb-3">
           <select (change)="onChangeBoard($event.target.value)">
             <option></option>
             <option *ngFor="let board of boards" [value]="board.id">
@@ -43,19 +47,21 @@
 <div *ngIf="loadingSprint">
   <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
-<div class="container" *ngIf="!loadingSprint && sprints && sprints.length">
-  <h2>Спрінти</h2>
+<div class="" *ngIf="!loadingSprint && sprints && sprints.length">
+  <h2 class="ms-2">Спрінти</h2>
   <div class="row">
-    <div class="form-check form-check-inline" *ngFor="let sprint of sprints">
-      <input class="form-check-input" (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
-             id="{{sprint.name}}">
-      <label class="form-check-label" for="{{sprint.name}}">
-        {{sprint.name}}
-      </label>
-    </div>
-    <div *ngIf="!metaSearch.isLast">
-      <button (click)="addSprints()">наступні</button>
-    </div>
+    <div class="form-check form-check-inline">
+      <ul class="zebra-list">
+        <cdk-virtual-scroll-viewport [itemSize]="48" [style.height.px]="virtualScrollHeight" class="sprint-list">
+          <li class="list-group-item sprint-list-item" *cdkVirtualFor="let sprint of sprints">
+            <input class="form-check-input" (change)="onChange(sprint.id, $event.target.checked)" name="{{ sprint.name }}" type="checkbox"
+                      id="{{sprint.name}}">
+            <label class="form-check-label" for="{{sprint.name}}">
+              {{sprint.name}}
+            </label>
+          </li>
+        </cdk-virtual-scroll-viewport>
+      </ul>
   </div>
   <div>
     <button (click)="find()">Пошук</button>

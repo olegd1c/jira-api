@@ -3,8 +3,8 @@
     <div class="row border border-primary mt-1 mb-3 p-2">
         <div class="col-sm-8 border-primary border-right">
             <app-filters (search)="onSearch($event)" [parent]="parentFilter.announcement"></app-filters>
-            <h5>Задачі ForBuild в активному спрінті</h5>
-            <table class="table table-striped w-auto">
+            <h5 class="table-custom-margin">Задачі ForBuild в активному спрінті</h5>
+            <table class="table table-striped w-auto table-custom-margin">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -35,7 +35,7 @@
         <div class="col">
             <div class="col-sm-12 contact-form">
                 <form [formGroup]="searchForm" (ngSubmit)="search()" class="form" role="form">
-                    <div class="row">
+                    <div class="row mb-2">
                         <div class="col-xs-9 col-md-9 form-group">
                             <input [attr.disabled]="loading ? '' : null" formControlName="number" class="form-control"
                                 placeholder="Номер задачі" type="text" required autofocus />
@@ -61,7 +61,7 @@
 
 <div>
     <form [formGroup]="announcementForm" (ngSubmit)="sendAnnouncement()" class="form" role="form">
-        <div class="row">
+        <div class="row mb-2">
             <div class='col-sm-6'>
                 <div class="form-group">
                     <div class='input-group date' id='datetimepicker2'>
@@ -90,8 +90,8 @@
         </div>
 
         <div class="row">
-            <table class="table table-striped w-auto" formArrayName="tasks">
-                <thead>
+            <table class="table table-striped w-auto table-custom-margin" formArrayName="tasks">
+                <thead class="">
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col" class="w-30">Номер задачі</th>
@@ -138,5 +138,5 @@
         </div>
     </form>
 
-    <textarea disabled cols="80" rows="15" [value]="announcementText"></textarea>
+    <textarea class="mt-2" disabled cols="80" rows="15" [value]="announcementText"></textarea>
 </div>

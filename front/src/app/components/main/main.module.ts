@@ -12,7 +12,7 @@ import {FiltersComponent} from '@components/filters/filters.component';
 import {AlertComponent} from '@components/alert/alert.component';
 import {AnnouncementsComponent} from '@components/announcements/announcements.component';
 import {HasPermissionDirective} from '@app/directive/has-permission.directive';
-
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 @NgModule({
   declarations: [
@@ -29,7 +29,8 @@ import {HasPermissionDirective} from '@app/directive/has-permission.directive';
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    MainRoutingModule
+    MainRoutingModule,
+    ScrollingModule,
   ],
   exports: [
     MainRoutingModule

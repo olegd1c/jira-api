@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, Query, Post, Body, UseGuards, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards, SetMetadata } from '@nestjs/common';
 import { JiraService } from './services/jira.service';
 import { GetUser } from './auth/user/get-user.decorator';
 import { User } from './models/user.model';
@@ -43,6 +43,16 @@ export class AppController {
     @GetUser() user: User,
   ): Promise<any> {
     return this.jiraService.getAllSprints(query, user);
+  }
+
+  @MetaPermissions(Permissions.view)
+  @UseGuards(JwtAuthGuard)
+  @Get('sprints-all-reversed')
+  getAllSprintsReversed(
+    @Query() query,
+    @GetUser() user: User,
+  ): Promise<any> {
+    return this.jiraService.getAllSprintsReversed(query, user);
   }
 
   @MetaPermissions(Permissions.view)

@@ -33,7 +33,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.8",
     "@nestjs/schedule": "^4.0.2",
-    "@types/jira-client": "^6.13.1",
+    "@types/jira-client": "^7.1.9",
     "axios": "^1.6.8",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",

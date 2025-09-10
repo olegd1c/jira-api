@@ -3,8 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { TasksComponent } from '@components/tasks/tasks.component';
 import { PointsComponent } from '@components/points/points.component';
 import { AnnouncementsComponent } from '@components/announcements/announcements.component';
-import {AuthGuard} from '@app/guards/auth.guard';
-import {MainComponent} from './main.component';
+import { AuthGuard } from '@app/guards/auth.guard';
+import { MainComponent } from './main.component';
 
 
 const routes: Routes = [

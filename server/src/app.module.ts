@@ -39,11 +39,7 @@ ConfigModule.forRoot({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const url = configService.get('MONGODB_URI');
-        const username = configService.get('MONGO_USERNAME');
-        const password = configService.get('MONGO_PASSWORD');
         const database = configService.get('MONGO_DATABASE');
-        const host = configService.get('MONGO_HOST');        
-        //const uri = `mongodb://${username}:${password}@${host}`;
         return {
           uri: url,
           dbName: database,
@@ -51,10 +47,6 @@ ConfigModule.forRoot({
       },
       inject: [ConfigService],
     }),
-    //MongooseModule.forRoot('mongodb://localhost/nest'),
-    //MongooseModule.forRootAsync({
-    //  useClass: MongooseConfigService,
-    //})
     CasesModule,
     MeetingModule,
     UserModule,

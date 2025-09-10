@@ -109,6 +109,29 @@ export class JiraService {
             });
     }
 
+    async getAllSprintsReversed(params, user?: User): Promise<any[]> {
+        let isLast = false;
+        const allSprints: any[] = [];
+
+        let start: number, pageSize: number, boardId: string, state: StateSprint;
+
+        start = (params.start) ? params.start : 0;
+        pageSize = (params.pageSize) ? params.pageSize : 50;
+        boardId = (params.boardId) ? params.boardId : '';
+        state = (params.state) ? params.state : undefined;
+
+        while (!isLast) {
+            const res = await jiraApi.getAllSprints(boardId, start, pageSize, state);
+
+            allSprints.push(...res.values);
+
+            isLast = res.isLast || (start + pageSize >= res.total);
+            start += pageSize;
+        }
+
+        // повертай у зворотному порядку (нові спочатку)
+        return allSprints.sort((a, b) => b.id - a.id);
+    }
     async getAllBoards(params): Promise<any> {
         let start: number, pageSize: number, name: string;
         start = (params.start) ? params.start : 0;

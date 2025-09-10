@@ -14,10 +14,14 @@ export class MeetingCronService {
 
     @Cron("*/5 08-19 * * 1-5")
     async handleCron() {
-        //this.logger.debug('MeetingCronService when the current second is 1');
-        const meetings = await this.meetingService.findCurrent();
-        //this.logger.debug(JSON.stringify(meetings));
-        this.telegramBotService.sendReminderMeetings(meetings).then(r => {});
+        //this.logger.debug('MeetingCronService start');
+        this.meetingService.findCurrent().then(meetings => {
+            //this.logger.debug(JSON.stringify(meetings));
+            this.telegramBotService.sendReminderMeetings(meetings);
+            }
+        ).catch(error => {
+            this.logger.debug(error);
+        });
     }
     
 }

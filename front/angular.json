@@ -40,7 +40,14 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "extractCss": true,
@@ -60,24 +67,56 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "debug": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "36kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.debug.ts"
+                }
+              ],
+              "outputHashing": "all",
+              "namedChunks": false,
+              "aot": false,
+              "buildOptimizer": false,
+              "sourceMap": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              }
             }
           }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "jira-front:build"
+            "buildTarget": "jira-front:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "jira-front:build:production"
+              "buildTarget": "jira-front:build:production"
+            },
+            "debug": {
+              "buildTarget": "jira-front:build:debug"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "jira-front:build"
+            "buildTarget": "jira-front:build"
           }
         },
         "test": {
@@ -125,7 +164,6 @@
       }
     }
   },
-  "defaultProject": "jira-front",
   "cli": {
     "analytics": false
   }

@@ -10,8 +10,9 @@
   <span class="spinner-border spinner-border-sm mr-1"></span>
 </div>
 <div *ngIf="!loading && items && items.length">
-  <table border="1">
-    <tr>
+  <table class="table table-striped">
+    <thead>
+      <tr>
       <th class="col">Имя</th>
       <th class="col">Jira login</th>
       <th class="col">Telegram login</th>
@@ -19,8 +20,9 @@
       <th class="col">Статус</th>
       <th class="col">Дії</th>
     </tr>
-
-    <tr *ngFor="let item of items">
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items">
       <td class="col">{{item.name}}</td>
       <td class="col">{{item.jiraLogin}}</td>
       <td class="col">{{item.telegramLogin}}</td>
@@ -52,6 +54,6 @@
         </div>
       </td>
     </tr>
-
+    </tbody>
   </table>
 </div>

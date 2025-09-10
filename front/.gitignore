@@ -9,6 +9,7 @@
 
 # files project
 src/app/params.ts
+/.angular
 
 # dependencies
 /node_modules
