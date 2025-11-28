@@ -1,27 +1,27 @@
-FROM node:12-alpine
+FROM node:20 AS builder
 
+# Копіюємо shared у корінь контейнера
+WORKDIR /shared
+COPY shared/ ./
 
-RUN mkdir /home/node/app
-RUN mkdir /home/node/shared
+# Переходимо до NestJS проекту
+WORKDIR /app
 
-WORKDIR /home/node/shared
-COPY ./shared /home/node/shared
+# 1. Копіюємо package.json з server/
+COPY server/package*.json ./
 
-WORKDIR /home/node/app
-COPY ./server /home/node/app
-
-#WORKDIR /home/node/app
-
-#ADD package.json /home/node/app/package.json
-
-RUN npm config set registry http://registry.npmjs.org
+# 2. Встановлюємо залежності
 RUN npm install
 
-#ADD . /app
+# 3. Копіюємо увесь Nest-проєкт
+COPY server/ ./
 
+# 4. Компілюємо
+RUN npm run build
+
+# 5. Експонуємо порт
 EXPOSE 3007
 
-CMD ["npm", "run", "start"]
-
-#docker build -t jira-api-server .
-#docker run -p 3007:3007 --name	jira-api-server
+# 6. Запускаємо NestJS
+CMD ["node", "dist/server/main.js"]
+#CMD ["npm", "run", "start"]
