@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import {IsNotEmpty, IsOptional} from 'class-validator';
 
 export class PostDto {
     @IsNotEmpty()
@@ -10,8 +10,11 @@ export class PostDto {
     @IsNotEmpty()
     jiraLogin: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     telegramLogin: string;
+
+    @IsNotEmpty()
+    email: string;
 
     @IsNotEmpty()
     status: string;

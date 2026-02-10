@@ -17,13 +17,12 @@ export class AppController {
 
   @Get()
   getHello(): string[] {
-    const actions = [
+    return[
       'boards',
       'sprints',
       'tasks?rapidViewId=472&sprintId=1673',
       'task/:key',
     ];
-    return actions;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -73,7 +72,7 @@ export class AppController {
     @Body() data: any,
     @GetUser() user: User,
   ): Promise<any> {
-    return this.telegramBotService.sendMessage(data, user);
+    return this.telegramBotService.sendAnnouncementMessage(data, user);
   }
   @MetaPermissions(Permissions.notify)
   @UseGuards(JwtAuthGuard)

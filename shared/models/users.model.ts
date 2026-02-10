@@ -9,6 +9,7 @@ export interface IUser {
     name: string;
     team?: ITeam;
     jiraLogin: string;
-    telegramLogin: string;
+    email: string;
+    telegramLogin?: string;
     status: StatusUser;
 }

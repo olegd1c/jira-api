@@ -19,6 +19,9 @@ export class User {
   telegramLogin: string;
 
   @Prop()
+  email: string;
+
+  @Prop()
   status: StatusUser;
 }
 

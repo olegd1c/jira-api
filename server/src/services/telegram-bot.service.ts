@@ -39,6 +39,24 @@ export class TelegramBotService {
         return result && result.status == 200 ? true : false;
     }
 
+    private sendAnnouncementWebHook(data: { message: string }, user: User) {
+        const announcementWebhook = this.configService.get('ANNOUNCEMENT_WEB_HOOK');
+        if (announcementWebhook) {
+                const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
+                const payload = { text: message };
+                if (!message) {
+                    return;
+                }
+                this.httpService.post(announcementWebhook, payload).subscribe();
+        }
+    }
+
+    async sendAnnouncementMessage(data: { message: string }, user: User): Promise<any> {
+        this.sendAnnouncementWebHook(data, user);
+        const result = await this.sendMessage(data, user);
+        return result && result.status == 200 ? true : false;
+    }
+
     async sendReminder(): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const chatId = this.configService.get('TELEGRAM_CHAT_ID_MK_FRONT');
@@ -64,7 +82,7 @@ export class TelegramBotService {
         meetings.forEach((item) => {
 
             const cr = new CronJob(item.cronTime, () => {
-                this.sendNotify(item, botId, token);
+                this.sendNotifyTelegram(item, botId, token);
             });
 
             cr.start();
@@ -75,13 +93,13 @@ export class TelegramBotService {
         });
     }
 
-    private sendNotify(item: Meeting, botId, token, chatIdBot?) {
-        const message = prepareMessage(item);
+    private sendNotifyTelegram(meeting: Meeting, botId, token, chatIdBot?) {
+        const message = prepareMessage(meeting);
         //this.logger.debug(`message: ${message}`);
         if (!message) {
             return;
         }
-        let chatId = chatIdBot ? chatIdBot : (item.team as Team).teamChatId;
+        let chatId = chatIdBot ? chatIdBot : (meeting.team as Team).teamChatId;
 
         let apiUrl = `${this.url}${botId}:${token}/sendMessage?chat_id=${chatId}&text=${message}`;
         apiUrl = encodeURI(apiUrl);
@@ -92,53 +110,37 @@ export class TelegramBotService {
         this.httpService.get(apiUrl, {headers: headersRequest}).subscribe();
     }
 
+    private sendNotifyWebHook(meeting: Meeting, webhookUrl: string, sendAll = false) {
+        const message = prepareMessageWebHook(meeting, sendAll);
+        const payload = { text: message };
+        if (!message) {
+            return;
+        }
+        this.httpService.post(webhookUrl, payload).subscribe();
+    }
+
     async sendReminderMeetings(meetings: MeetingDocument[]): Promise<any> {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
         meetings.forEach((item) => {
-
-            const cr = new CronJob(item.cronTime, () => {
-                this.sendNotify(item, botId, token);
-            }, null, true,null,null,null,null,true);
+                this.sendNotifyTelegram(item, botId, token);
+                const webHookMeeting = (item.team as Team).webHook;
+                this.sendNotifyWebHook(item, webHookMeeting, true);
         });
     }
 
-    /*
-    async sendReminderReview(teams: TeamDocument[]): Promise<any> {
+    async sendNotifyTasks(team: Team, tasks: Task[]) {
         const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
         const botId = this.configService.get('TELEGRAM_BOT_ID');
-
-        teams.forEach(item => {
-                this.findTasks(item, botId, token);
-            }
-        )
-    }
-
-    private async findTasks(elem: Team, botId: string, token: string) {
-        const tasks: Task[] = await this.jiraService.getTaskForReview(elem.boardId);
-
+        const webHookReview = 'https://chat.googleapis.com/v1/spaces/AAQAO3xRONQ/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=Broxh3qyEaS_y9znjRBak1nseAq-LpsRym4Q66HHpUw';
         if (tasks.length) {
 
-            const data: Meeting[] = this.parseReviewTasks(tasks, elem.users);
+            const data: Meeting[] = this.parseReviewTasks(tasks, team.users);
 
-            data.forEach((item) => {
-                this.sendNotify(item, botId, token, elem.reviewChatId);
-            });
-        }
-    }
-    */
-
-    async sendNotifyTasks(elem: Team, tasks: Task[]) {
-        const token = this.configService.get('TELEGRAM_CHAT_TOKEN');
-        const botId = this.configService.get('TELEGRAM_BOT_ID');
-
-        if (tasks.length) {
-
-            const data: Meeting[] = this.parseReviewTasks(tasks, elem.users);
-
-            data.forEach((item) => {
-                this.sendNotify(item, botId, token, elem.reviewChatId);
+            data.forEach((task) => {
+                this.sendNotifyTelegram(task, botId, token, team.reviewChatId);
+                this.sendNotifyWebHook(task, webHookReview);
             });
         }
     }
@@ -152,7 +154,6 @@ export class TelegramBotService {
         if (tasks) {
             tasks.forEach((item: Task) => {
                 let tempMeeting = {title: title + item.link + "\n" + item.summary, users: []};
-                let tmpReviewer = '';
                 item.reviewers.forEach((reviewer: string) => {
                     let tmpReviewer = {name: reviewer, telegramLogin: '', status: StatusUser.active};
                     
@@ -184,6 +185,22 @@ function prepareMessage(item: Meeting) {
         mess = item.title + "\n";
         _users.map(u => {
             mess = mess + u.name + ( u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
+        });
+    }
+
+    return mess;
+}
+
+function prepareMessageWebHook(item: Meeting, sendAll = false) {
+    let mess = '';
+    if (sendAll) {
+        mess = mess + '<users/all>'
+    }
+    const _users = item.users.filter(user => user.status === StatusUser.active);
+    if (_users.length > 0) {
+        mess = item.title + "\n";
+        _users.map(u => {
+            mess = mess + u.name + ( !sendAll && u.email ? ' @' + u.email : '') + "\n";
         });
     }
 

@@ -2,6 +2,7 @@ import MeetingService from '@app/controllers/meeting/meeting.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import {TelegramBotService} from '@services/telegram-bot.service';
+import {AppService} from "@services/app.service";
 
 @Injectable()
 export class MeetingCronService {
@@ -10,14 +11,18 @@ export class MeetingCronService {
     constructor(
         private telegramBotService: TelegramBotService,
         private meetingService: MeetingService,
+        private appService: AppService,
+
         ) {}
 
-    @Cron("*/5 08-19 * * 1-5")
+    // Секунди Хвилини Години День Місяць День_тижня
+    @Cron("0 */5 08-19 * * 1-5")
     async handleCron() {
         //this.logger.debug('MeetingCronService start');
         this.meetingService.findCurrent().then(meetings => {
-            //this.logger.debug(JSON.stringify(meetings));
-            this.telegramBotService.sendReminderMeetings(meetings);
+            const meetingsToStart = meetings.filter(m => this.appService.isItTime(m.cronTime));
+            //this.logger.debug(JSON.stringify(meetingsToStart));
+            this.telegramBotService.sendReminderMeetings(meetingsToStart);
             }
         ).catch(error => {
             this.logger.debug(error);

@@ -1,6 +1,5 @@
 import MeetingService from '@app/controllers/meeting/meeting.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
 import { TelegramBotService } from './telegram-bot.service';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class TasksService {
 
     }
 
-    @Cron("0 */1 * * * *")
+    //@Cron("0 */1 * * * *")
     async handleCron() {
         //this.logger.debug('Called when the current second is 1');
         const meetings = await this.meetingService.findCurrent();

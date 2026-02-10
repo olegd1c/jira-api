@@ -47,6 +47,7 @@ export class TeamCreateComponent implements OnInit {
       name: [''],
       reviewChatId: [''],
       teamChatId: [''],
+      webHook: [''],
       boardId: [''],
       checkReview: [false],
       checkMeeting: [false],

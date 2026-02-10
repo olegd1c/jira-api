@@ -34,6 +34,14 @@
                   </div>
                 </div>
                 <div class="form-group">
+                  <label for="webHook">Web Hook</label>
+                  <input type="text" formControlName="webHook" placeholder="65462134685"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.webHook.errors }" />
+                  <div *ngIf="submitted && f.webHook.errors" class="invalid-feedback">
+                    <div *ngIf="f.webHook.errors.required">Web Hook обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
                   <label for="boardId">ІД дошки</label>
                   <input type="text" formControlName="boardId" placeholder="405"
                          class="form-control" [ngClass]="{ 'is-invalid': submitted && f.boardId.errors }" />

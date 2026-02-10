@@ -47,6 +47,7 @@ export class UserMeetingCreateComponent implements OnInit {
       team: [''],
       jiraLogin: [''],
       telegramLogin: [''],
+      email: [''],
       status: [''],
     });
   }

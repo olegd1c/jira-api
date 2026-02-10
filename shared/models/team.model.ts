@@ -8,7 +8,8 @@ export enum StatusTeam {
 export interface ITeam {
     name: string;
     reviewChatId?: number;
-    teamChatId?: number;
+    teamChatId?: string;
+    webHook?: string;
     boardId?: number;
     checkReview?: boolean;
     checkMeeting?: boolean;

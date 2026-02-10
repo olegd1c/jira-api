@@ -18,6 +18,9 @@ export class Team {
   teamChatId?: number;
 
   @Prop()
+  webHook?: string;
+
+  @Prop()
   boardId: number;
 
   @Prop()
