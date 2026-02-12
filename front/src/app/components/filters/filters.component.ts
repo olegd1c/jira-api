@@ -30,7 +30,7 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy, AfterView
   @Input() parent: ParentFilter;
   @Output() search: EventEmitter<ParamsFilter> = new EventEmitter();
 
-  @ViewChild(CdkVirtualScrollViewport) virtualScroll: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport) virtualScroll!: CdkVirtualScrollViewport;
   virtualScrollHeight: number;
   suggestItemHeight = 52;
   currentPage = 1;
@@ -89,7 +89,7 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy, AfterView
       .subscribe(res => {
         this.boards = res;
         this.loading = false;
-      }, err => {
+      }, () => {
         this.loading = false;
         this.boards = [];
       });
@@ -214,7 +214,8 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy, AfterView
         takeUntil(this.alive$),
         debounceTime(100), // щоб зменшити частоту
         filter(() => !this.loadingSprint), // не запускати, поки ще не завершив попереднє
-        filter(() => this.virtualScroll.measureScrollOffset('bottom') === 0)
+        filter(() => !!this.virtualScroll),
+        filter(() => this.virtualScroll.measureScrollOffset('bottom') < 20)
       )
       .subscribe(() => {
         this.loadMoreSprints();

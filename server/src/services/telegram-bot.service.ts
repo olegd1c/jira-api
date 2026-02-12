@@ -35,19 +35,19 @@ export class TelegramBotService {
             'Content-Type': 'application/json'
         };
 
-        const result = await this.httpService.get(apiUrl, {headers: headersRequest}).toPromise();
+        const result = await this.httpService.get(apiUrl, { headers: headersRequest }).toPromise();
         return result && result.status == 200 ? true : false;
     }
 
     private sendAnnouncementWebHook(data: { message: string }, user: User) {
         const announcementWebhook = this.configService.get('ANNOUNCEMENT_WEB_HOOK');
         if (announcementWebhook) {
-                const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
-                const payload = { text: message };
-                if (!message) {
-                    return;
-                }
-                this.httpService.post(announcementWebhook, payload).subscribe();
+            const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
+            const payload = { text: message };
+            if (!message) {
+                return;
+            }
+            this.httpService.post(announcementWebhook, payload).subscribe();
         }
     }
 
@@ -70,7 +70,7 @@ export class TelegramBotService {
         const headersRequest = {
             'Content-Type': 'application/json'
         };
-        const result = await this.httpService.get(apiUrl, {headers: headersRequest}).toPromise();
+        const result = await this.httpService.get(apiUrl, { headers: headersRequest }).toPromise();
 
         return result && result.status == 200 ? true : false;
     }
@@ -94,7 +94,7 @@ export class TelegramBotService {
     }
 
     private sendNotifyTelegram(meeting: Meeting, botId, token, chatIdBot?) {
-        const message = prepareMessage(meeting);
+        const message = this.prepareMessage(meeting);
         //this.logger.debug(`message: ${message}`);
         if (!message) {
             return;
@@ -107,16 +107,57 @@ export class TelegramBotService {
             'Content-Type': 'application/json'
         };
 
-        this.httpService.get(apiUrl, {headers: headersRequest}).subscribe();
+        this.httpService.get(apiUrl, { headers: headersRequest }).subscribe();
     }
 
     private sendNotifyWebHook(meeting: Meeting, webhookUrl: string, sendAll = false) {
-        const message = prepareMessageWebHook(meeting, sendAll);
-        const payload = { text: message };
-        if (!message) {
+        const requestId = Math.random().toString(36).substring(7);
+        this.logger.debug(`[${requestId}] sendNotifyWebHook, sendAll: ${sendAll}`);
+
+        if (!webhookUrl || !webhookUrl.trim()) {
+            this.logger.warn(`[${requestId}] Webhook URL is missing or empty`);
             return;
         }
-        this.httpService.post(webhookUrl, payload).subscribe();
+
+        const cleanUrl = webhookUrl.trim();
+        const message = this.prepareMessageWebHook(meeting, sendAll);
+        const payload = { text: message };
+
+        if (!message) {
+            this.logger.debug(`[${requestId}] Message is empty, skipping`);
+            return;
+        }
+
+        this.logger.debug(`[${requestId}] Sending webhook to ${cleanUrl}`);
+        this.logger.debug(`[${requestId}] Payload: ${JSON.stringify(payload)}`);
+
+        this.httpService.post(cleanUrl, payload, {
+            headers: { 'Content-Type': 'application/json' }
+        }).subscribe({
+            next: (response) => {
+                this.logger.log(`[${requestId}] Webhook sent successfully: ${response.status}`);
+            },
+            error: (error) => {
+                this.logger.error(`[${requestId}] Failed to send webhook`);
+                if (error.response) {
+                    this.logger.error(`[${requestId}] Status: ${error.response.status}`);
+                    try {
+                        this.logger.error(`[${requestId}] Data: ${JSON.stringify(error.response.data)}`);
+                    } catch (e) {
+                        this.logger.error(`[${requestId}] Data (raw): ${error.response.data}`);
+                    }
+                    try {
+                        this.logger.error(`[${requestId}] Headers: ${JSON.stringify(error.response.headers)}`);
+                    } catch (e) {
+                        this.logger.error(`[${requestId}] Headers (raw): ${error.response.headers}`);
+                    }
+                } else if (error.request) {
+                    this.logger.error(`[${requestId}] No response received from webhook server`);
+                } else {
+                    this.logger.error(`[${requestId}] Request setup error: ${error.message}`);
+                }
+            }
+        });
     }
 
     async sendReminderMeetings(meetings: MeetingDocument[]): Promise<any> {
@@ -124,9 +165,9 @@ export class TelegramBotService {
         const botId = this.configService.get('TELEGRAM_BOT_ID');
 
         meetings.forEach((item) => {
-                this.sendNotifyTelegram(item, botId, token);
-                const webHookMeeting = (item.team as Team).webHook;
-                this.sendNotifyWebHook(item, webHookMeeting, true);
+            this.sendNotifyTelegram(item, botId, token);
+            const webHookMeeting = (item.team as Team).webHook;
+            this.sendNotifyWebHook(item, webHookMeeting, true);
         });
     }
 
@@ -153,10 +194,10 @@ export class TelegramBotService {
 
         if (tasks) {
             tasks.forEach((item: Task) => {
-                let tempMeeting = {title: title + item.link + "\n" + item.summary, users: []};
+                let tempMeeting = { title: title + item.link + "\n" + item.summary, users: [] };
                 item.reviewers.forEach((reviewer: string) => {
-                    let tmpReviewer = {name: reviewer, telegramLogin: '', status: StatusUser.active};
-                    
+                    let tmpReviewer = { name: reviewer, telegramLogin: '', status: StatusUser.active };
+
                     const fUser = users.filter((item) => item.jiraLogin == reviewer);
 
                     if (fUser.length > 0) {
@@ -176,33 +217,35 @@ export class TelegramBotService {
 
         return result;
     }
-}
 
-function prepareMessage(item: Meeting) {
-    let mess = '';
-    const _users = item.users.filter(user => user.status === StatusUser.active);
-    if (_users.length > 0) {
-        mess = item.title + "\n";
-        _users.map(u => {
-            mess = mess + u.name + ( u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
-        });
+    private prepareMessageWebHook(item: Meeting, sendAll = false) {
+        this.logger.debug('sendNotifyWebHook, sendAll: ' + sendAll);
+
+        let mess = '';
+        mess = mess + item.title + "\n";
+        if (sendAll) {
+            mess = mess + '<users/all>'
+        }
+        const _users = item.users.filter(user => user.status === StatusUser.active);
+        if (_users.length > 0) {
+            _users.map(u => {
+                mess = mess + u.name + (!sendAll && u.email ? ' @' + u.email : '') + "\n";
+            });
+        }
+
+        return mess;
     }
 
-    return mess;
-}
+    private prepareMessage(item: Meeting) {
+        let mess = '';
+        const _users = item.users.filter(user => user.status === StatusUser.active);
+        if (_users.length > 0) {
+            mess = item.title + "\n";
+            _users.map(u => {
+                mess = mess + u.name + (u.telegramLogin ? ' @' + u.telegramLogin : '') + "\n";
+            });
+        }
 
-function prepareMessageWebHook(item: Meeting, sendAll = false) {
-    let mess = '';
-    if (sendAll) {
-        mess = mess + '<users/all>'
+        return mess;
     }
-    const _users = item.users.filter(user => user.status === StatusUser.active);
-    if (_users.length > 0) {
-        mess = item.title + "\n";
-        _users.map(u => {
-            mess = mess + u.name + ( !sendAll && u.email ? ' @' + u.email : '') + "\n";
-        });
-    }
-
-    return mess;
 }

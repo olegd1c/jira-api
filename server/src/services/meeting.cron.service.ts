@@ -18,10 +18,8 @@ export class MeetingCronService {
     // Секунди Хвилини Години День Місяць День_тижня
     @Cron("0 */5 08-19 * * 1-5")
     async handleCron() {
-        //this.logger.debug('MeetingCronService start');
         this.meetingService.findCurrent().then(meetings => {
             const meetingsToStart = meetings.filter(m => this.appService.isItTime(m.cronTime));
-            //this.logger.debug(JSON.stringify(meetingsToStart));
             this.telegramBotService.sendReminderMeetings(meetingsToStart);
             }
         ).catch(error => {

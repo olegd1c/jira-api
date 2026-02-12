@@ -5,13 +5,13 @@ export const weeksType = [
 ];
 
 export const daysCron = [
-    {id: "* * * * 1", name: 'Пн'},
-    {id: "* * * * 2", name: 'Вт'},
-    {id: "* * * * 3", name: 'Ср'},
-    {id: "* * * * 4", name: 'Чт'},
-    {id: "* * * * 5", name: 'Пт'},
-    {id: "* * * * 1,2,4,5", name: 'Пн,Вт,Чт,Пт'},
-    {id: "* * * * 1-5", name: 'Пн,Вт,Ср,Чт,Пт'},
+    {id: "* * * * * 1", name: 'Пн'},
+    {id: "* * * * * 2", name: 'Вт'},
+    {id: "* * * * * 3", name: 'Ср'},
+    {id: "* * * * * 4", name: 'Чт'},
+    {id: "* * * * * 5", name: 'Пт'},
+    {id: "* * * * * 1,2,4,5", name: 'Пн,Вт,Чт,Пт'},
+    {id: "* * * * * 1-5", name: 'Пн,Вт,Ср,Чт,Пт'},
 ];
 
 export function weeksTypeArray() {

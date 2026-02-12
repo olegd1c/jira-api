@@ -13,25 +13,21 @@ export class AppService {
 
   isItTime(cronExpression: string): boolean {
     try {
-      // 1. Створюємо об'єкт CronJob (другий аргумент - пуста функція)
       const job = new CronJob(cronExpression, () => {});
 
-      // 2. Отримуємо дату останнього запуску відносно "зараз"
-      const lastExecution = job.lastDate();
-
-      if (!lastExecution) return false;
-
-      // 3. Отримуємо поточний час і скидаємо секунди/мілісекунди для точного порівняння
+      // Отримуємо дату НАСТУПНОГО запуску відносно "хвилину тому"
       const now = new Date();
-      now.setSeconds(0, 0);
+      const nextRun = job.nextDate().toJSDate();
 
-      const lastRun = new Date(lastExecution);
-      lastRun.setSeconds(0, 0);
-
-      // 4. Порівнюємо (в мілісекундах)
-      return now.getTime() === lastRun.getTime();
-    } catch (error) {
-      // Якщо маска крона в базі виявилася битою
+      // Якщо наступний запуск запланований на поточну хвилину
+      return (
+          nextRun.getFullYear() === now.getFullYear() &&
+          nextRun.getMonth() === now.getMonth() &&
+          nextRun.getDate() === now.getDate() &&
+          nextRun.getHours() === now.getHours() &&
+          nextRun.getMinutes() === now.getMinutes()
+      );
+    } catch {
       return false;
     }
   }
