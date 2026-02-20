@@ -49,6 +49,8 @@ export class UserMeetingCreateComponent implements OnInit {
       telegramLogin: [''],
       email: [''],
       status: [''],
+      isConfirm: [''],
+      isExecutor: [''],
     });
   }
 
@@ -60,7 +62,7 @@ export class UserMeetingCreateComponent implements OnInit {
     } else {
       req = this.service.createUserMeeting(data);
     }
-    req.then((result) => {
+    req.then(() => {
       this.router.navigate([this.url]);
     });
   }
@@ -69,7 +71,7 @@ export class UserMeetingCreateComponent implements OnInit {
     this.service.getUserMeetings(id).then(result => {
       this.userForm.patchValue(result);
       this.loading = false;
-    }).catch(error => {
+    }).catch(() => {
       this.loading = false;
     });
   }
@@ -84,7 +86,7 @@ export class UserMeetingCreateComponent implements OnInit {
       } else {
         this.loading = false;
       }
-    }).catch(error => {
+    }).catch(() => {
       this.loading = false;
     });
   }

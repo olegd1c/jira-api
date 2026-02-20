@@ -12,4 +12,6 @@ export interface IUser {
     email: string;
     telegramLogin?: string;
     status: StatusUser;
+    isConfirm?: boolean;
+    isExecutor?: boolean;
 }

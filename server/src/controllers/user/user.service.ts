@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
 import { PostDto } from './dto/post.dto';
 import { getWeekType, WeekType } from '@app/utils/utils';
+import {StatusUser} from "@shared_models/users.model";
  
 @Injectable()
 class UserService {
@@ -59,6 +60,18 @@ class UserService {
     (await this.userModel.find()).forEach(item => {
       this.delete(item.id);
     });
+  }
+
+  async findConfirms(): Promise<User[]> {
+    return this.userModel.find({isConfirm: true, status: StatusUser.active})
+        .select('name -_id')
+        .exec();
+  }
+
+  async findExecutors(): Promise<User[]> {
+    return this.userModel.find({isExecutor: true, status: StatusUser.active})
+        .select('name -_id')
+        .exec();
   }
 }
  

@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
-import { Params } from '@app/params';
 import { ParamsFilter, ParentFilter } from '@models/filter.model';
+import {UserMeetingService} from "@components/reminder/components/user-meeting/user-meeting.service";
 
 @Component({
   selector: 'app-announcements',
@@ -15,8 +15,8 @@ export class AnnouncementsComponent implements OnInit {
   searchForm: FormGroup;
   announcementForm: FormGroup;
   announcementText = '';
-  confirmList = Params.confirmList;
-  executorList = Params.executorList;
+  confirmList: string[] = [];
+  executorList: string[] = [];
   links = '';
   sending = false;
   taskForBuild = [];
@@ -28,7 +28,8 @@ export class AnnouncementsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private userMeetingService: UserMeetingService,
   ) { }
 
   ngOnInit(): void {
@@ -44,8 +45,10 @@ export class AnnouncementsComponent implements OnInit {
     });
 
     this.announcementForm.valueChanges.subscribe(
-      data => this.onValueChanged());
+      () => this.onValueChanged());
     this.onValueChanged();
+
+    this.getParams();
   }
 
   onValueChanged() {
@@ -103,7 +106,7 @@ export class AnnouncementsComponent implements OnInit {
         Validators.required
       ]],
       info: [item.info, [
-        
+
       ]]
     });
   }
@@ -131,7 +134,7 @@ export class AnnouncementsComponent implements OnInit {
     const task = this.taskForBuild.filter(item => item.key === key);
     if (task.length) {
       task[0].isAdd = false;
-    }  
+    }
     this.tasksForm.removeAt(index);
   }
 
@@ -179,6 +182,20 @@ export class AnnouncementsComponent implements OnInit {
     }).catch(() => {
       this.taskForBuild = [];
       this.loading = false;
+    });
+  }
+
+  private getParams(): void {
+    this.userMeetingService.getConfirms().then(result => {
+      this.confirmList = result.map(user => user.name);
+    }).catch(() => {
+      this.confirmList = [];
+    });
+
+    this.userMeetingService.getExecutors().then(result => {
+      this.executorList = result.map(user => user.name);
+    }).catch(() => {
+      this.executorList = [];
     });
   }
 

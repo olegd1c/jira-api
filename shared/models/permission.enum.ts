@@ -1,4 +1,5 @@
 export enum Permissions {
     view = 'view',
-    notify = 'notify'
+    notify = 'notify',
+    reminder = 'reminder'
 }

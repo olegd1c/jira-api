@@ -1,12 +1,9 @@
 export interface IParams {
   apiUrl: string;
   local_storegr_time: number;
-  confirmList: string[];
 }
 
 export const Params: IParams = {
     apiUrl: 'http://localhost:3007/',
-    local_storegr_time: 60*60*24,
-    confirmList: [],
-    executorList: [],
+    local_storegr_time: 60*60*24
 }

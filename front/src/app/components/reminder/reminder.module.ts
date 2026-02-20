@@ -13,7 +13,6 @@ import {MeetingCreateComponent} from './components/meeting/meeting-create/meetin
 
 import {MeetingService} from '@app/components/reminder/components/meeting/meeting.service';
 import {TeamService} from '@app/components/reminder/components/team/team.service';
-import {UserMeetingService} from '@app/components/reminder/components/user-meeting/user-meeting.service';
 
 @NgModule({
   declarations: [
@@ -31,7 +30,6 @@ import {UserMeetingService} from '@app/components/reminder/components/user-meeti
   ],
   providers: [
     MeetingService,
-    UserMeetingService,
     TeamService,
   ]
 })

@@ -14,12 +14,22 @@ import {PostDto} from './dto/post.dto';
 
 @Controller('users')
 export default class UserController {
-    constructor(private readonly userService: UserService) {
+    constructor(private userService: UserService) {
     }
 
     @Get()
     async getAllPosts() {
         return this.userService.findAll();
+    }
+
+    @Get('confirms')
+    async getConfirms() {
+        return this.userService.findConfirms();
+    }
+
+    @Get('executors')
+    async getExecutors() {
+        return this.userService.findExecutors();
     }
 
     @Get(':id')

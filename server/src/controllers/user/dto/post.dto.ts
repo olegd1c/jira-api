@@ -18,4 +18,10 @@ export class PostDto {
 
     @IsNotEmpty()
     status: string;
+
+    @IsOptional()
+    isConfirm: boolean;
+
+    @IsOptional()
+    isExecutor: boolean;
 }

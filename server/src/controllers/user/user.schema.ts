@@ -23,6 +23,12 @@ export class User {
 
   @Prop()
   status: StatusUser;
+
+  @Prop()
+  isConfirm: boolean;
+
+  @Prop()
+  isExecutor: boolean;
 }
 
 let UserSchema = SchemaFactory.createForClass(User);

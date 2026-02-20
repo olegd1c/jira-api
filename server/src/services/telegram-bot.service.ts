@@ -224,7 +224,7 @@ export class TelegramBotService {
         let mess = '';
         mess = mess + item.title + "\n";
         if (sendAll) {
-            mess = mess + '<users/all>'
+            mess = mess + '<users/all>' + "\n";
         }
         const _users = item.users.filter(user => user.status === StatusUser.active);
         if (_users.length > 0) {

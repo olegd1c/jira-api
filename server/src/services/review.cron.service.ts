@@ -15,13 +15,13 @@ export class ReviewCronService {
         private jiraService: JiraService
         ) {}
 
-    @Cron("0 09-18/3 * * 1-5") //0 09-18/3 * * 1-5   //*/1 * * * 1-5
+    @Cron("0 0 09-18/3 * * 1-5") //0 09-18/3 * * 1-5   //*/1 * * * 1-5
     handleCron() {
         //this.logger.debug('ReviewCronService start');
         this.teamService.findForReview().then(teams => {
             teams.forEach(async team => {
                 const tasks: Task[] = await this.jiraService.getTaskForReview(team.boardId);
-                this.telegramBotService.sendNotifyTasks(team, tasks).then(r => {});
+                this.telegramBotService.sendNotifyTasks(team, tasks).then(() => {});
             });
         }).catch(error => {
             this.logger.debug(error);
