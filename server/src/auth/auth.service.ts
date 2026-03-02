@@ -39,7 +39,7 @@ export class AuthService {
        let permissions = [Permissions.view];
 
         const notifUsersSet = new Set(configService.get<string>('NOTIFICATION_USERS', '').split(','));
-        const usersExecutors = await this.userService.findExecutors();
+        const usersExecutors = await this.userService.findExecutors('jiraLogin');
 
         usersExecutors.forEach(user => {
             if (user.jiraLogin) notifUsersSet.add(user.jiraLogin);

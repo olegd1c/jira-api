@@ -161,7 +161,9 @@ export class JiraService {
         return result;
     }
 
-    async getTaskForReview(boardId: number): Promise<any> {
+    async getTaskForReview(boardId?: number): Promise<any> {
+
+        let tasks: Task[] = [];
 
         if (!jiraApi) {
             const result = await this.initJiraApiBot();
@@ -170,11 +172,13 @@ export class JiraService {
                 throw new UnauthorizedException('Invalid credentials');
             }
         }
-
+        if (!boardId) {
+            return tasks;
+        }
         const strints = await this.getAllSprints({boardId: boardId, state: StateSprint.active});
         const sprintId = strints.values[0]['id'];
         const params = {boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview']};
-        const tasks: Task[] = await this.getAllTasks(params);
+        tasks = await this.getAllTasks(params);
 
         return tasks;
     }

@@ -68,9 +68,9 @@ class UserService {
         .exec();
   }
 
-  async findExecutors(): Promise<User[]> {
+  async findExecutors(fieldName: 'name' | 'jiraLogin' = 'name'): Promise<User[]> {
     return this.userModel.find({isExecutor: true, status: StatusUser.active})
-        .select('name -_id')
+        .select(`${fieldName} -_id`)
         .exec();
   }
 }
