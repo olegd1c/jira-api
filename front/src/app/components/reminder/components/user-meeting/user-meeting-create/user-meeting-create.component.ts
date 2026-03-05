@@ -49,8 +49,8 @@ export class UserMeetingCreateComponent implements OnInit {
       telegramLogin: [''],
       email: [''],
       status: [''],
-      isConfirm: [''],
-      isExecutor: [''],
+      isConfirm: [false],
+      isExecutor: [false],
     });
   }
 

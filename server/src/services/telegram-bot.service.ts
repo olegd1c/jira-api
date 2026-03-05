@@ -39,7 +39,7 @@ export class TelegramBotService {
         return result && result.status == 200 ? true : false;
     }
 
-    private sendAnnouncementWebHook(data: { message: string }, user: User) {
+    private async sendAnnouncementWebHook(data: { message: string }, user: User): Promise<boolean> {
         const announcementWebhook = this.configService.get('ANNOUNCEMENT_WEB_HOOK');
         if (announcementWebhook) {
             const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
@@ -47,14 +47,16 @@ export class TelegramBotService {
             if (!message) {
                 return;
             }
-            this.httpService.post(announcementWebhook, payload).subscribe();
+            const result = await this.httpService.post(announcementWebhook, payload).toPromise();
+
+            return result && result.status == 200 ? true : false;
         }
     }
 
     async sendAnnouncementMessage(data: { message: string }, user: User): Promise<any> {
-        this.sendAnnouncementWebHook(data, user);
-        const result = await this.sendMessage(data, user);
-        return result && result.status == 200 ? true : false;
+        await this.sendMessage(data, user);
+        const resultWebHook = await this.sendAnnouncementWebHook(data, user);
+        return resultWebHook;
     }
 
     async sendReminder(): Promise<any> {
