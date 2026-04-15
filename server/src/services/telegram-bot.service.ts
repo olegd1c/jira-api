@@ -209,7 +209,7 @@ export class TelegramBotService {
                             tmpReviewer.telegramLogin = fUser[0].telegramLogin;
                             tmpReviewer.email = fUser[0].email;
                         } else {
-                            tmpReviewer.name = '✅ ' + tmpReviewer.name;
+                            tmpReviewer.name = tmpReviewer.name + ' ✅';
                         }
                     }
                     tempMeeting.users.push(tmpReviewer);
@@ -234,7 +234,7 @@ export class TelegramBotService {
         const _users = item.users.filter(user => user.status === StatusUser.active);
         if (_users.length > 0) {
             _users.map(u => {
-                mess = mess + u.name + (!sendAll && u.email ? ' <users/' + u.email + '>' : '') + "\n";
+                mess = mess + u.name + (!sendAll && u.email ? ' @' + u.email : '') + "\n";
             });
         }
 
