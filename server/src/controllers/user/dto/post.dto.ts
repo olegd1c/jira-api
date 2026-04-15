@@ -1,4 +1,5 @@
-import {IsNotEmpty, IsOptional} from 'class-validator';
+import {IsBoolean, IsNotEmpty, IsOptional} from 'class-validator';
+import {Transform} from "class-transformer";
 
 export class PostDto {
     @IsNotEmpty()
@@ -13,15 +14,33 @@ export class PostDto {
     @IsOptional()
     telegramLogin: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     email: string;
 
     @IsNotEmpty()
     status: string;
 
     @IsOptional()
-    isConfirm: boolean;
+    @Transform(({ value }) => {
+        // Якщо значення null, undefined або порожня строка — повертаємо false
+        if (value === null || value === undefined || value === '') {
+            return false;
+        }
+        // В іншому випадку намагаємося перетворити на boolean (напр. рядок "true" -> true)
+        return [true, 'true', 1, '1'].includes(value);
+    })
+    @IsBoolean()
+    isConfirm: boolean = false;
 
     @IsOptional()
-    isExecutor: boolean;
+    @Transform(({ value }) => {
+        // Якщо значення null, undefined або порожня строка — повертаємо false
+        if (value === null || value === undefined || value === '') {
+            return false;
+        }
+        // В іншому випадку намагаємося перетворити на boolean (напр. рядок "true" -> true)
+        return [true, 'true', 1, '1'].includes(value);
+    })
+    @IsBoolean()
+    isExecutor: boolean = false;
 }

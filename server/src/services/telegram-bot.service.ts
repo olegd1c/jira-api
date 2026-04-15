@@ -54,7 +54,7 @@ export class TelegramBotService {
     }
 
     async sendAnnouncementMessage(data: { message: string }, user: User): Promise<any> {
-        await this.sendMessage(data, user);
+        //await this.sendMessage(data, user);
         const resultWebHook = await this.sendAnnouncementWebHook(data, user);
         return resultWebHook;
     }
@@ -198,7 +198,7 @@ export class TelegramBotService {
             tasks.forEach((item: Task) => {
                 let tempMeeting = { title: title + item.link + "\n" + item.summary, users: [] };
                 item.reviewers.forEach((reviewer: string) => {
-                    let tmpReviewer = { name: reviewer, telegramLogin: '', status: StatusUser.active };
+                    let tmpReviewer: any = { name: reviewer, telegramLogin: '', email: '', status: StatusUser.active };
 
                     const fUser = users.filter((item) => item.jiraLogin == reviewer);
 
@@ -207,6 +207,9 @@ export class TelegramBotService {
                         const fReviewsConductediews = item.reviews_conducted.filter((elem) => elem == reviewer);
                         if (fReviewsConductediews.length == 0) {
                             tmpReviewer.telegramLogin = fUser[0].telegramLogin;
+                            tmpReviewer.email = fUser[0].email;
+                        } else {
+                            tmpReviewer.name = '✅ ' + tmpReviewer.name;
                         }
                     }
                     tempMeeting.users.push(tmpReviewer);
@@ -231,7 +234,7 @@ export class TelegramBotService {
         const _users = item.users.filter(user => user.status === StatusUser.active);
         if (_users.length > 0) {
             _users.map(u => {
-                mess = mess + u.name + (!sendAll && u.email ? ' @' + u.email : '') + "\n";
+                mess = mess + u.name + (!sendAll && u.email ? ' <users/' + u.email + '>' : '') + "\n";
             });
         }
 
