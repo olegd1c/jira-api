@@ -85,7 +85,7 @@ export class JiraService {
         }
     }
 
-    async getAllSprints(params, user?: User): Promise<any> {
+    async getAllSprints(params): Promise<any> {
         const start = params.start ?? 0;
         const pageSize = params.pageSize ?? 50;
         const boardId = params.boardId ?? '';
@@ -107,7 +107,7 @@ export class JiraService {
         }
     }
 
-    async getAllSprintsReversed(params, user?: User): Promise<any[]> {
+    async getAllSprintsReversed(params): Promise<any[]> {
         let isLast = false;
         const allSprints: any[] = [];
 
@@ -147,9 +147,7 @@ export class JiraService {
         const tasks: Task[] = await this.getAllTasks(query);
         const { temp, devAvg, testAvg, reviewerAvg } = this.parsePointTasks(tasks);
 
-        const result: Analytics = { sprints: temp, sprintsAvg: { dev: devAvg, test: testAvg, reviewer: reviewerAvg } };
-
-        return result;
+        return { sprints: temp, sprintsAvg: { dev: devAvg, test: testAvg, reviewer: reviewerAvg } } as Analytics;
     }
 
     async getTaskForReview(boardId?: number): Promise<any> {
@@ -354,12 +352,12 @@ export class JiraService {
         if (user.token) {
             // Якщо є токен, використовуємо тільки його (Bearer PAT)
             jiraOptions.bearer = user.token;
-            this.logger.debug(`Ініціалізація Jira API з токеном для користувача: ${user.username}`);
+            //this.logger.debug(`Ініціалізація Jira API з токеном для користувача: ${user.username}`);
         } else if (user.username && user.password) {
             // Якщо токена немає, використовуємо логін/пароль (Basic Auth)
             jiraOptions.username = user.username;
             jiraOptions.password = user.password;
-            this.logger.debug(`Ініціалізація Jira API з паролем для користувача: ${user.username}`);
+            //this.logger.debug(`Ініціалізація Jira API з паролем для користувача: ${user.username}`);
         } else {
             throw new UnauthorizedException('Не надано облікових даних (токен або пароль)');
         }
@@ -367,9 +365,8 @@ export class JiraService {
         jiraApi = new JiraApi(jiraOptions);
 
         try {
-            const currentUser = await jiraApi.getCurrentUser();
-            this.logger.log(`Успішне підключення до Jira: ${currentUser.displayName || currentUser.name}`);
-            return currentUser;
+            return await jiraApi.getCurrentUser();
+            //this.logger.log(`Успішне підключення до Jira: ${currentUser.displayName || currentUser.name}`);
         } catch (err) {
             this.logger.error(`Помилка авторизації Jira: ${err.message}`);
             throw err;
