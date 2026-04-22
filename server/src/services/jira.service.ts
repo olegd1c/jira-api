@@ -1,17 +1,18 @@
-import {Injectable, UnauthorizedException} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as JiraApi from "jira-client"
 import { ConfigService } from '@nestjs/config';
 import { Task, Analytics, Assignee, PointAvg, TaskAnnouncement } from '@shared_models/task.model';
-import {Sprint, StateSprint} from '@shared_models/sprint.model';
+import { Sprint, StateSprint } from '@shared_models/sprint.model';
 import { User } from '@models/user.model';
 import { FieldTask } from '@models/field.model';
 import { SprintPoint } from '@app/models/task.model';
 
 let apiConfig = null;
-let  jiraApi: JiraApi;
+let jiraApi: JiraApi;
 
 @Injectable()
 export class JiraService {
+    private readonly logger = new Logger(JiraService.name);
 
     constructor(private configService: ConfigService) {
         apiConfig = {
@@ -22,103 +23,99 @@ export class JiraService {
         };
     }
 
+    /**
+     * Перевіряє наявність jiraApi та ініціалізує бот-з'єднання при потребі
+     */
+    private async ensureJiraApi(): Promise<void> {
+        if (!jiraApi) {
+            const result = await this.initJiraApiBot();
+            if (!result) {
+                throw new UnauthorizedException('Invalid credentials');
+            }
+        }
+    }
+
     async getIssue(key: string): Promise<any> {
+        try {
+            const issue = await jiraApi.findIssue(key);
 
-        return jiraApi.findIssue(key)
-            .then(function (issue) {
-                let fields = [];
+            if (!issue) {
+                this.logger.warn(`Задачу не знайдено: ${key}`);
+                return {};
+            }
 
-                Object.keys(issue.fields).forEach(item => {
-                    fields.push(item + ': ' + issue.fields[item]);
-                }
-                );
+            const dev = issue.fields['assignee'];
+            const devName = dev?.name ?? '';
+            const fieldPointDev = issue.fields[FieldTask.pointDev];
+            const pointDev = fieldPointDev ? +fieldPointDev['value'] : 0;
+            const fieldTest = issue.fields[FieldTask.tester];
+            const [sprintName, sprintsName] = getSprintName(issue.fields[FieldTask.sprints]);
 
-                let result = {};
-                if (issue) {
-                    const dev = issue.fields['assignee'];
-                    const devName = (dev) ? dev.name : '';
-                    const fieldPointDev = issue.fields[FieldTask.pointDev];
-                    const pointDev = (fieldPointDev) ? +fieldPointDev['value'] : 0;
-                    const fieldTest = issue.fields[FieldTask.tester];
-                    const fieldSprints = issue.fields[FieldTask.sprints];
-                    let sprintName, sprintsName;
-                    [sprintName, sprintsName] = getSprintName(fieldSprints);
-                    //const sprintName = this.getNameSprint(fieldSprints);
+            const testName = fieldTest?.[0]?.name ?? '';
+            const fieldPointTest = issue.fields[FieldTask.pointTest];
+            const pointTest = fieldPointTest ? +fieldPointTest['value'] : 0;
+            const pointStory = issue.fields[FieldTask.pointStory];
+            const link = getLinkTask(key);
 
-                    const testName = (fieldTest) ? fieldTest[0].name : '';
-                    const fieldPointTest = issue.fields[FieldTask.pointTest];
-                    const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : 0;
-                    const pointStory = issue.fields[FieldTask.pointStory];
-                    const link = getLinkTask(key);
+            const summary = issue.fields[FieldTask.summary];
+            const comment = issue.fields[FieldTask.comment];
+            const reviews_conducted = [];
+            if (comment?.comments?.length) {
+                const reviewPatterns = ["review+", "review +", "ревью+", "ревью +"];
+                comment.comments.forEach(element => {
+                    reviewPatterns.forEach(pattern => {
+                        if (element.body.includes(pattern) && element.author) {
+                            reviews_conducted.push(element.author.name);
+                        }
+                    });
+                });
+            }
 
-                    const summary = issue.fields[FieldTask.summary];
-                    const comment = issue.fields[FieldTask.comment];
-                    const reviews_conducted = [];
-                    if (comment && comment.comments && comment.comments.length) {
-                        comment.comments.forEach(element => {
-                            ['review+', 'review +', 'ревью+', 'ревью +'].map(elemR => {
-                                if (element.body.includes(elemR)
-                                    && element.author) 
-                                    {
-                                    reviews_conducted.push(element.author.name);
-                            }
-                            })
-                        });
-                    }
+            const actualTimeDev_raw = issue.fields[FieldTask.actualTimeDev];
+            const actualTimeDev = actualTimeDev_raw ? +actualTimeDev_raw : 0;
 
-                    result = { devName: devName, pointDev: pointDev, testName: testName,
-                        pointTest: pointTest, sprintName: sprintName, sprintsName: sprintsName,
-                        pointStory: pointStory, link: link, summary: summary, reviews_conducted: reviews_conducted };
-                } else {
-                    console.log('не найден: ' + key);
-                }
-
-                return result;
-
-            })
-            .catch(function (err) {
-                console.error(err);
-            });
-
+            return {
+                devName, pointDev, testName, pointTest,
+                sprintName, sprintsName, pointStory, link,
+                summary, reviews_conducted, actualTimeDev
+            };
+        } catch (err) {
+            this.logger.error(`Помилка отримання задачі ${key}: ${err.message}`);
+            return {};
+        }
     }
 
     async getAllSprints(params, user?: User): Promise<any> {
-        //console.log(user);
-        let start: number, pageSize: number, boardId: string, state: StateSprint;
-        //console.log('getAllSprints', params);
-        
-        start = (params.start) ? params.start : 0;
-        pageSize = (params.pageSize) ? params.pageSize : 50;
-        boardId = (params.boardId) ? params.boardId : '';
-        state = (params.state) ? params.state : undefined;
+        const start = params.start ?? 0;
+        const pageSize = params.pageSize ?? 50;
+        const boardId = params.boardId ?? '';
+        const state = params.state ?? undefined;
 
-        return jiraApi.getAllSprints(boardId, start, pageSize, state).then(result => {
+        try {
+            const result = await jiraApi.getAllSprints(boardId, start, pageSize, state);
 
-            //console.log('getAllSprints: ' + JSON.stringify(result));
-            let items: Sprint[] = [];
-            result.values.forEach(item => {
-                items.push({id: item.id, name: item.name, state: item.state, startDate: item.startDate, endDate: item.endDate, completeDate: item.completeDate});
-            });
+            const items: Sprint[] = result.values.map(item => ({
+                id: item.id, name: item.name, state: item.state,
+                startDate: item.startDate, endDate: item.endDate, completeDate: item.completeDate
+            }));
 
             sortList(items);
 
-            return {meta:{isLast: result.isLast, start: result.startAt, pageSize: result.maxResults}, values: items};
-        })
-            .catch(function (err) {
-                console.error(err);
-            });
+            return { meta: { isLast: result.isLast, start: result.startAt, pageSize: result.maxResults }, values: items };
+        } catch (err) {
+            this.logger.error(`Помилка отримання спринтів: ${err.message}`);
+        }
     }
 
     async getAllSprintsReversed(params, user?: User): Promise<any[]> {
         let isLast = false;
         const allSprints: any[] = [];
 
-        let start: number, pageSize: number, boardId: string, state: StateSprint;
-
-        start = (params.start) ? params.start : 0;
-        pageSize = (params.pageSize) ? params.pageSize : 50;
-        boardId = (params.boardId) ? params.boardId : '';
-        state = (params.state) ? params.state : undefined;
+        const start_init = params.start ?? 0;
+        const pageSize = params.pageSize ?? 50;
+        const boardId = params.boardId ?? '';
+        const state = params.state ?? undefined;
+        let start = start_init;
 
         while (!isLast) {
             const res = await jiraApi.getAllSprints(boardId, start, pageSize, state);
@@ -129,83 +126,85 @@ export class JiraService {
             start += pageSize;
         }
 
-        // повертай у зворотному порядку (нові спочатку)
+        // повертаємо у зворотному порядку (нові спочатку)
         return allSprints.sort((a, b) => b.id - a.id);
     }
+
     async getAllBoards(params): Promise<any> {
-        let start: number, pageSize: number, name: string;
-        start = (params.start) ? params.start : 0;
-        pageSize = (params.pageSize) ? params.pageSize : 50;
-        name = (params.name) ? params.name : '';
+        const start = params.start ?? 0;
+        const pageSize = params.pageSize ?? 50;
+        const name = params.name ?? '';
 
-        return jiraApi.getAllBoards(start, pageSize, null, name).then(result => {
-
-                //console.log('getAllBoards: ' + JSON.stringify(result));
-                let items = [];
-                result.values.forEach(item => {
-                    items.push({id: item.id, name: item.name});
-                })
-
-                return items;
-            }).catch(function (err) {
-                console.error(err);
-            });
+        try {
+            const result = await jiraApi.getAllBoards(start, pageSize, null, name);
+            return result.values.map(item => ({ id: item.id, name: item.name }));
+        } catch (err) {
+            this.logger.error(`Помилка отримання бордів: ${err.message}`);
+        }
     }
 
     async getPointByDev(query): Promise<any> {
         const tasks: Task[] = await this.getAllTasks(query);
-        var { temp, devAvg, testAvg, reviewerAvg }: { temp, devAvg, testAvg, reviewerAvg} = this.parsePointTasks(tasks);
+        const { temp, devAvg, testAvg, reviewerAvg } = this.parsePointTasks(tasks);
 
-        const result: Analytics = {sprints: temp, sprintsAvg: {dev: devAvg, test: testAvg, reviewer: reviewerAvg}};
+        const result: Analytics = { sprints: temp, sprintsAvg: { dev: devAvg, test: testAvg, reviewer: reviewerAvg } };
 
         return result;
     }
 
     async getTaskForReview(boardId?: number): Promise<any> {
+        await this.ensureJiraApi();
 
-        let tasks: Task[] = [];
-
-        if (!jiraApi) {
-            const result = await this.initJiraApiBot();
-
-            if (!result) {
-                throw new UnauthorizedException('Invalid credentials');
-            }
-        }
         if (!boardId) {
-            return tasks;
+            return [];
         }
-        const strints = await this.getAllSprints({boardId: boardId, state: StateSprint.active});
-        const sprintId = strints.values[0]['id'];
-        const params = {boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview']};
-        tasks = await this.getAllTasks(params);
 
+        const sprints = await this.getAllSprints({ boardId, state: StateSprint.active });
+        const sprintId = sprints.values[0]['id'];
+        const params = { boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview'] };
+
+        return await this.getAllTasks(params);
+    }
+
+    async getTaskForBuild(params: { boardId: number }): Promise<any> {
+        await this.ensureJiraApi();
+
+        let tasks: Task[];
+        const sprints = await this.getAllSprints({ boardId: params.boardId, state: StateSprint.active });
+        if (sprints?.values?.length) {
+            const paramSprints = sprints.values.map(item => item.id);
+            const paramsTasks = { boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild', 'InBuild', 'ReleaseTesting', 'ReleaseTested'] };
+            tasks = await this.getAllTasks(paramsTasks, true);
+        }
+        sortList(tasks, 'release');
         return tasks;
     }
 
-    async getTaskForBuild(params: {boardId: number}): Promise<any> {
+    async getTaskMissingTimeTracking(boardId?: number): Promise<Task[]> {
+        await this.ensureJiraApi();
 
-        if (!jiraApi) {
-            const result = await this.initJiraApiBot();
+        if (!boardId) {
+            return [];
+        }
 
-            if (!result) {
-                throw new UnauthorizedException('Invalid credentials');
-            }
+        const sprints = await this.getAllSprints({ boardId, state: StateSprint.active });
+        if (sprints?.values?.length) {
+            const sprintId = sprints.values[0]['id'];
+            const params = {
+                boardId,
+                sprintsId: [sprintId],
+                statusesTask: ['Done', 'Closed', 'Resolved', 'ForBuild', 'ReleaseTesting', 'ReleaseTested']
+            };
+            const allTasks: Task[] = await this.getAllTasks(params);
+
+            // Фільтруємо задачі без проставленого кастомного часу "Фактическое время в часах, разработка"
+            return allTasks.filter(task => !task.actualTimeDev || task.actualTimeDev === 0);
         }
-        let tasks: Task[];
-        const sprints = await this.getAllSprints({boardId: params.boardId, state: StateSprint.active});
-        if (sprints && sprints.values && sprints.values.length) {
-            let paramSprints = [];
-            sprints.values.map( item => {paramSprints.push(item.id)});
-            const paramsTasks = {boardId: params.boardId, sprintsId: paramSprints, statusesTask: ['ForBuild', 'InBuild', 'ReleaseTesting', 'ReleaseTested']};
-            tasks = await this.getAllTasks(paramsTasks, true);
-        }
-        sortList(tasks,'release');
-        return tasks;
+
+        return [];
     }
 
     private parsePointTasks(tasks: Task[]) {
-
         const temp: SprintPoint[] = [];
         const devAvg: PointAvg[] = [];
         const testAvg: PointAvg[] = [];
@@ -213,28 +212,25 @@ export class JiraService {
 
         if (tasks) {
             tasks.forEach((item: Task) => {
-                let insertSprint = false;            
+                let insertSprint = false;
                 let fItem: SprintPoint;
                 let fItemDev: Assignee;
-                let findex = temp.findIndex(t => t.name == item.sprintName
-                );
+                const findex = temp.findIndex(t => t.name == item.sprintName);
                 if (findex >= 0) {
                     fItem = temp[findex];
-                }
-                else {
+                } else {
                     fItem = { name: item.sprintName, values: [] };
                     insertSprint = true;
                 }
-                
+
                 const devs = [
-                    {name: 'devName', point: 'pointDev', type: 0},
-                    {name: 'testName', point: 'pointTest', type: 1},
-                    //{name: 'reviewers', point: 'pointDev', type: 2},
+                    { name: 'devName', point: 'pointDev', type: 0 },
+                    { name: 'testName', point: 'pointTest', type: 1 },
                 ];
-                devs.map(d => {
+                devs.forEach(d => {
                     parseAssingPoint(fItem, fItemDev, item, d);
                 });
-                const d = {name: 'devName', point: 'pointDev', type: 2};
+                const d = { name: 'devName', point: 'pointDev', type: 2 };
                 item.reviewers.forEach(r => {
                     parseAssingPoint(fItem, fItemDev, item, d, r);
                 });
@@ -244,18 +240,16 @@ export class JiraService {
                 }
             });
         }
-        temp.forEach((itemS: SprintPoint) => {
 
+        temp.forEach((itemS: SprintPoint) => {
             itemS.values.forEach((item: Assignee) => {
                 let insertDev = false;
                 let fItem: PointAvg;
-                let tempAvg = (item.type === 0) ? devAvg : ((item.type === 2) ? reviewerAvg : testAvg);
-                let fIndex = tempAvg.findIndex(t => t.name == item.name);
-                //console.log('findex', findex);
+                const tempAvg = (item.type === 0) ? devAvg : ((item.type === 2) ? reviewerAvg : testAvg);
+                const fIndex = tempAvg.findIndex(t => t.name == item.name);
                 if (fIndex >= 0) {
                     fItem = tempAvg[fIndex];
-                }
-                else {
+                } else {
                     fItem = { name: item.name, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0, countSprint: 0 };
                     insertDev = true;
                 }
@@ -267,49 +261,23 @@ export class JiraService {
                 if (insertDev) {
                     tempAvg.push(fItem);
                 }
-
             });
         });
 
-        [devAvg, testAvg, reviewerAvg].map(avg => {
-            sortList(avg);
-        });
-
-        [devAvg, testAvg].map(avg => {
-            countAvg(avg, true);
-        });
+        [devAvg, testAvg, reviewerAvg].forEach(avg => sortList(avg));
+        [devAvg, testAvg].forEach(avg => countAvg(avg, true));
         countAvg(reviewerAvg);
+
         return { temp, devAvg, testAvg, reviewerAvg };
     }
 
     async getAllTasks(query, announcement = false): Promise<any> {
-        const boardId = query.boardId;
-        const sprintId = query.sprintId;
-        const sprintsId = query.sprintsId;
-        const keys = query.keys;
-        const statusesTask = query.statusesTask;
+        const { boardId, sprintId, sprintsId, keys, statusesTask } = query;
 
         if (sprintsId || keys) {
-
-            let sprintIds = '';
-            let keyIds = '';
-            let statusTask = '';
-
-            if (sprintsId && typeof sprintsId !== 'string' && sprintsId.length > 0) {
-                sprintIds = sprintsId.toString();
-            } else {
-                sprintIds = sprintsId;
-            }
-
-            if (keys && typeof keys !== 'string' && keys.length > 0) {
-                keyIds = keys.toString();
-            } else {
-                keyIds = keys;
-            }
-
-            if (statusesTask && statusesTask.length > 0) {
-                statusTask = statusesTask.toString();
-            }
+            const sprintIds = Array.isArray(sprintsId) ? sprintsId.toString() : (sprintsId || '');
+            const keyIds = Array.isArray(keys) ? keys.toString() : (keys || '');
+            const statusTask = statusesTask?.length ? statusesTask.toString() : '';
 
             let jql = '';
 
@@ -319,220 +287,179 @@ export class JiraService {
 
             if (sprintIds) {
                 if (jql) {
-                    jql = jql + ' AND ';
+                    jql += ' AND ';
                 }
-
-                jql = jql + `type in (Task, Bug, Story) AND Sprint in (${sprintIds}) ORDER BY Sprint ASC`;
+                jql += `type in (Task, Bug, Story) AND Sprint in (${sprintIds}) ORDER BY Sprint ASC`;
             } else if (keyIds) {
-                jql =  `issuekey in (${keyIds})`;
+                jql = `issuekey in (${keyIds})`;
             }
-            const fields = 'key';
-            return jiraApi.getIssuesForBoard(boardId, 0, 1000, jql).then(async result => {
 
-                const items: any[] = await this.parseTasks(result.issues, announcement);
-                return items;
-            })
-                .catch(function (err) {
-                    console.error(err);
-                });
+            try {
+                const result = await jiraApi.getIssuesForBoard(boardId, 0, 1000, jql);
+                return await this.parseTasks(result.issues, announcement);
+            } catch (err) {
+                this.logger.error(`Помилка отримання задач: ${err.message}`);
+            }
         } else {
-            return jiraApi.getSprintIssues(boardId, sprintId).then(async result => {
-                    const items = await this.parseTasks(result.contents.completedIssues);
-
-                    return items;
-                }).catch(function (err) {
-                        console.error(err);
-                });
+            try {
+                const result = await jiraApi.getSprintIssues(boardId, sprintId);
+                return await this.parseTasks(result.contents.completedIssues);
+            } catch (err) {
+                this.logger.error(`Помилка отримання задач спринту: ${err.message}`);
+            }
         }
     }
 
-    private async parseTasks(result: any, announcement = false): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            let items = [];
-            let i = 1;
+    private async parseTasks(issues: any[], announcement = false): Promise<any[]> {
+        const items = await Promise.all(issues.map(async (item) => {
+            if (announcement) {
+                return await this.getIssueAnnouncement(item.key);
+            }
 
-            await Promise.all(result.map(async (item) => {
-                let result;
+            const data = await this.getIssue(item.key);
+            const reviewers = item.fields[FieldTask.reviewer]
+                ? item.fields[FieldTask.reviewer].map(element => element.key)
+                : [];
 
-                if (announcement) {
-                    result = await this.getIssueAnnouncement(item.key);
-                } else {
-                    const data = await this.getIssue(item.key);
-                    const reviewers = [];
-                    if (item.fields[FieldTask.reviewer]) {
-                        item.fields[FieldTask.reviewer].forEach(element => {
-                            reviewers.push(element.key);
-                        });
-                    }
-                    result = Object.assign({ id: item.id, key: item.key, summary: item.summary, reviewers: reviewers }, data);
-                }
-                items.push(result);
-                i++;
-            }));
-            resolve(items);
-        });
+            return { id: item.id, key: item.key, summary: item.summary, reviewers, ...data };
+        }));
+
+        return items;
     }
 
     async getJiraApi(user: User): Promise<any> {
-
-            jiraApi = new JiraApi({
-                protocol: apiConfig.protocol,
-                host: apiConfig.host,
-                username: user.username,
-                password: user.password,
-                apiVersion: apiConfig.apiVersion,
-                strictSSL: apiConfig.strictSSL
-            });
+        jiraApi = new JiraApi({
+            protocol: apiConfig.protocol,
+            host: apiConfig.host,
+            username: user.username,
+            bearer: user.token,
+            apiVersion: apiConfig.apiVersion,
+            strictSSL: apiConfig.strictSSL
+        });
 
         return jiraApi.getCurrentUser();
     }
 
     async getIssueAnnouncement(key: string): Promise<any> {
+        try {
+            const issue = await jiraApi.findIssue(key);
 
-        return jiraApi.findIssue(key)
-            .then(function (issue) {
-                let fields = [];
+            if (!issue) {
+                this.logger.warn(`Задачу не знайдено: ${key}`);
+                return null;
+            }
 
-                let result: TaskAnnouncement = null;
-                if (issue) {
+            const dev = issue.fields['assignee'];
+            const devName = dev?.displayName ?? '';
 
-                    const dev = issue.fields['assignee'];
-                    const devName = (dev) ? dev.displayName : '';
+            const fieldTest = issue.fields[FieldTask.tester];
+            const summary = issue.fields['summary'];
+            let release = '';
+            if (issue.fields[FieldTask.fixVersions]?.length) {
+                release = issue.fields[FieldTask.fixVersions].map(item => item.name).join(';');
+            }
 
-                    const fieldTest = issue.fields[FieldTask.tester];
-                    const summary = issue.fields['summary'];
-                    let release = '';
-                    if ((issue.fields[FieldTask.fixVersions] && issue.fields[FieldTask.fixVersions].length)) {
-                        issue.fields[FieldTask.fixVersions].map(item => {
-                            release = release + item.name + ';';
-                            });
-                    }
+            const issueKey = issue['key'];
+            const link = getLinkTask(issueKey);
+            const testName = fieldTest?.[0]?.displayName ?? '';
 
-                    const key = issue['key'];
-                    const link = getLinkTask(key);
+            const issuelinks = issue.fields['issuelinks'];
+            let links = '';
+            let info = '';
+            const labels = issue.fields['labels'] || [];
+            const hasMarketLabel = labels.includes('common_affected_market');
+            const hasRestLabel = labels.includes('common_affected_rest');
 
-                    const testName = (fieldTest) ? fieldTest[0].displayName : '';
+            if (hasMarketLabel || hasRestLabel) {
+                const affected = [
+                    hasMarketLabel ? 'Market' : '',
+                    hasRestLabel ? 'Rest' : ''
+                ].filter(Boolean).join(', ');
+                info = `!!! Зміни в Common зачіпають ${affected}`;
+            }
 
-                    const issuelinks = issue.fields['issuelinks'];
-                    let links = '';
-                    let info = '';
-                    const findLabelMarket = issue.fields['labels'].filter(l => l == 'common_affected_market');
-                    const findLabelRest = issue.fields['labels'].filter(l => l == 'common_affected_rest');
-                    if (findLabelMarket.length > 0 || findLabelRest.length > 0) {
-                        info = '!!! Зміни в Common зачіпають';
-                        if (findLabelMarket.length > 0) {
-                            info = info + ' Market,';
-                        }
-                        if (findLabelRest.length > 0) {
-                            info = info + ' Rest,';
-                        }
-                        info = info.substring(0, info.length - 1);
-                    }
-                    
-                    
-                    if (issuelinks) {
-                        issuelinks.map(t => {
-                            if (t.inwardIssue) {
-                                links = links + t.inwardIssue.key + ';';
-                            }
-                        });
-                    }    
+            if (issuelinks) {
+                links = issuelinks
+                    .filter(t => t.inwardIssue)
+                    .map(t => t.inwardIssue.key)
+                    .join(';');
+            }
 
-                    result = { devName: devName, testName: testName, summary: summary, link: link, key: key, links: links, release: release, info: info};
-                } else {
-                    console.log('не найден: ' + key);
-                }
-
-                return result;
-
-            })
-            .catch(function (err) {
-                console.error(err);
-            });
-
+            return { devName, testName, summary, link, key: issueKey, links, release, info } as TaskAnnouncement;
+        } catch (err) {
+            this.logger.error(`Помилка отримання анонсу ${key}: ${err.message}`);
+            return null;
+        }
     }
 
-    async updateStoryPoints(data: {boardId: string, keys: string[]}): Promise<any> {
-        
+    async updateStoryPoints(data: { boardId: string, keys: string[] }): Promise<any> {
         const tasks: Task[] = await this.getAllTasks(data);
 
-        await tasks.map(async data => {
-            let result = await jiraApi.findIssue(data.key)
-                .then(async function (issue) {
-                    let result = {};
-                    if (issue) {
+        await Promise.all(tasks.map(async (task) => {
+            try {
+                const issue = await jiraApi.findIssue(task.key);
 
-                        let fields = [];
-                        Object.keys(issue.fields).forEach(item => {
-                                fields.push(item + ': ' + issue.fields[item]);
-                            }
-                        );
+                if (!issue) {
+                    this.logger.warn(`Задачу не знайдено: ${task.key}`);
+                    return;
+                }
 
-                        const fieldPointDev = issue.fields[FieldTask.pointDev];
-                        const pointDev = (fieldPointDev) ? +fieldPointDev['value'] : null;
-                        
-                        const fieldPointTest = issue.fields[FieldTask.pointTest];
-                        const pointTest = (fieldPointTest) ? +fieldPointTest['value'] : null;
-                        const pointStory = issue.fields[FieldTask.pointStory];
-                        if ((pointDev || pointDev == 0) 
-                                && (pointTest || pointTest == 0) 
-                                && (pointStory != (pointTest+pointDev))
-                                ) {
-                            let fieldsUpdate = {"fields": {}};
-                            fieldsUpdate["fields"][FieldTask.pointStory] = pointDev + pointTest;
+                const fieldPointDev = issue.fields[FieldTask.pointDev];
+                const pointDev = fieldPointDev ? +fieldPointDev['value'] : null;
 
-                            result = await jiraApi.updateIssue(data.key, fieldsUpdate);
-                        }
+                const fieldPointTest = issue.fields[FieldTask.pointTest];
+                const pointTest = fieldPointTest ? +fieldPointTest['value'] : null;
+                const pointStory = issue.fields[FieldTask.pointStory];
 
-                    } else {
-                        console.log('не найден: ' + data.key);
-                    }
-                    return result;
-                })
-                .catch(function (err) {
-                    console.error(err);
-                });
-            });
+                if ((pointDev || pointDev == 0)
+                    && (pointTest || pointTest == 0)
+                    && (pointStory != (pointTest + pointDev))
+                ) {
+                    const fieldsUpdate = { "fields": { [FieldTask.pointStory]: pointDev + pointTest } };
+                    await jiraApi.updateIssue(task.key, fieldsUpdate);
+                }
+            } catch (err) {
+                this.logger.error(`Помилка оновлення story points для ${task.key}: ${err.message}`);
+            }
+        }));
     }
 
     private async initJiraApiBot() {
         const username = this.configService.get<string>('JIRA_API_BOT_LOGIN');
-        const password = this.configService.get<string>('JIRA_API_BOT_PASS');
-
-        const user = {username, password};
-        let result;
+        const token = this.configService.get<string>('JIRA_API_BOT_TOKEN');
 
         try {
-            result = await this.getJiraApi(user);
+            return await this.getJiraApi({ username, token } as User);
         } catch (e) {
-
+            this.logger.error(`Помилка ініціалізації Jira API бота: ${e.message}`);
+            return null;
         }
-
-        return result;
     }
 }
 
-function getSprintName(fieldSprints: string[]) {
-    let sprintName = '', sprintsName = [];
+function getSprintName(fieldSprints: string[]): [string, string] {
+    let sprintName = '';
+    const sprintsName: string[] = [];
+
     if (fieldSprints) {
-        fieldSprints.forEach(string => {
-            const result = parseStringName(string);
+        fieldSprints.forEach(str => {
+            const result = parseStringName(str);
             sprintName = result;
             sprintsName.push(result);
         });
-
     }
+
     return [sprintName, sprintsName.toString()];
 }
 
-function parseStringName(string: string) {
+function parseStringName(str: string): string {
     const substring = 'name=';
     const substringEnd = ',';
 
-    const indexStart = string.indexOf(substring);
-    const indexEnd = string.substr(indexStart).indexOf(substringEnd);
-    const result = string.substr(indexStart + 5, indexEnd - 5);
-    return result;
+    const indexStart = str.indexOf(substring);
+    const rest = str.substring(indexStart);
+    const indexEnd = rest.indexOf(substringEnd);
+    return rest.substring(5, indexEnd);
 }
 
 function parseAssingPoint(fItem, fItemDev, item, d, nameUser = '') {
@@ -540,12 +467,11 @@ function parseAssingPoint(fItem, fItemDev, item, d, nameUser = '') {
     if (!nameUser) {
         nameUser = item[d.name];
     }
-    let fIndexDev = fItem.values.findIndex(t => t.name == nameUser && t.type == d.type);
+    const fIndexDev = fItem.values.findIndex(t => t.name == nameUser && t.type == d.type);
 
     if (fIndexDev >= 0) {
         fItemDev = fItem.values[fIndexDev];
-    }
-    else {
+    } else {
         fItemDev = { name: nameUser, count: 0, point: 0, type: d.type };
         insertDev = true;
     }
@@ -558,12 +484,12 @@ function parseAssingPoint(fItem, fItemDev, item, d, nameUser = '') {
 }
 
 function countAvg(avg, useTotal = false) {
-    const total: PointAvg = {name: 'Разом', countSprint: 0, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0};
-    avg.map(item => {
+    const total: PointAvg = { name: 'Разом', countSprint: 0, countAll: 0, pointAll: 0, countAvg: 0, pointAvg: 0 };
+    avg.forEach(item => {
         item.pointAvg = (item.pointAll / item.countSprint).toFixed(1);
         item.countAvg = (item.countAll / item.countSprint).toFixed(1);
 
-        if (useTotal) {        
+        if (useTotal) {
             total.countAll = total.countAll + item.countAll;
             total.pointAll = total.pointAll + item.pointAll;
             total.countAvg = (+total.countAvg) + (+item.countAvg);
@@ -577,17 +503,15 @@ function countAvg(avg, useTotal = false) {
 }
 
 function sortList(list, nameField = 'name') {
-    list.sort(function(a, b){
-        const nameA=a[nameField].toLowerCase(), nameB=b[nameField].toLowerCase();
-        if (nameA < nameB) //sort string ascending
-            return -1
-        if (nameA > nameB)
-            return 1
-        return 0 //default return value (no sorting)
+    list.sort((a, b) => {
+        const nameA = a[nameField].toLowerCase();
+        const nameB = b[nameField].toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
     });
 }
 
 function getLinkTask(key: string) {
     return `${apiConfig.protocol}://${apiConfig.host}/browse/${key}`;
 }
-

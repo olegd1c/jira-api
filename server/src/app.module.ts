@@ -14,9 +14,12 @@ import UserModule from './controllers/user/user.module';
 import { TasksService } from '@services/tasks.service';
 import { AppService } from '@services/app.service';
 import { JiraService } from '@services/jira.service';
-import { MeetingCronService } from '@services/meeting.cron.service';
-import { ReviewCronService } from '@services/review.cron.service';
+import { MeetingCronService } from '@services/cron/meeting.cron.service';
+import { ReviewCronService } from '@services/cron/review.cron.service';
+import { TimeTrackingCronService } from '@services/cron/timetracking.cron.service';
 import { TelegramBotService } from '@services/telegram-bot.service';
+import { GoogleChatService } from '@services/google-chat.service';
+import { NotificationService } from '@services/notification.service';
 import CasesService from './controllers/case/case.service';
 import MeetingService from './controllers/meeting/meeting.service';
 import UserService from './controllers/user/user.service';
@@ -59,12 +62,15 @@ ConfigModule.forRoot({
     JiraService,
     ConfigService,
     TelegramBotService,
+    GoogleChatService,
+    NotificationService,
     TasksService,
     CasesService,
     MeetingService,
     UserService,
     MeetingCronService,
     ReviewCronService,
+    TimeTrackingCronService,
     TeamService
   ],
   exports: [

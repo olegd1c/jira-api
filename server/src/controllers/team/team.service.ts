@@ -4,14 +4,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Team, TeamDocument } from './team.schema';
 import { PostDto } from './dto/post.dto';
 import { StatusTeam } from "@shared_models/team.model";
- 
+
 @Injectable()
 class TeamService {
-  constructor(@InjectModel(Team.name) private model: Model<TeamDocument>) {}
+  constructor(@InjectModel(Team.name) private model: Model<TeamDocument>) { }
 
   async findAll() {
     return this.model
-    .find()
+      .find()
       .populate('users');
   }
 
@@ -53,9 +53,13 @@ class TeamService {
   }
 
   async findForReview(): Promise<TeamDocument[]> {
-    return this.model.find({checkReview: true, status: StatusTeam.active, reviewChatId: {$ne:null}}).populate('users');
+    return this.model.find({ checkReview: true, status: StatusTeam.active, reviewChatId: { $ne: null } }).populate('users');
   }
-  
+
+  async findForTimeTracking(): Promise<TeamDocument[]> {
+    return this.model.find({ checkReview: true, status: StatusTeam.active }).populate('users');
+  }
+
 }
- 
+
 export default TeamService;

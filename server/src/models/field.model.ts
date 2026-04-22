@@ -8,5 +8,6 @@ export enum FieldTask {
     summary = 'summary',
     comment = 'comment',
     fixVersions = 'fixVersions',
-    labels = 'labels'
+    labels = 'labels',
+    actualTimeDev = 'customfield_17118'
 }

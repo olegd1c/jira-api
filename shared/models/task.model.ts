@@ -12,6 +12,7 @@ export interface Task {
     reviews_conducted: [],
     link: string;
     summary: string;
+    actualTimeDev?: number;
 }
 
 export interface Analytics {

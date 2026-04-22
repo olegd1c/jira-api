@@ -4,6 +4,7 @@ import { GetUser } from './auth/user/get-user.decorator';
 import { User } from './models/user.model';
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 import { TelegramBotService } from './services/telegram-bot.service';
+import { NotificationService } from './services/notification.service';
 import { Permissions } from './shared/models/permission.enum';
 
 export const MetaPermissions = (...permissions: string[]) => SetMetadata('permissions', permissions);
@@ -12,7 +13,8 @@ export const MetaPermissions = (...permissions: string[]) => SetMetadata('permis
 export class AppController {
   constructor(
     private readonly jiraService: JiraService,
-    private readonly telegramBotService: TelegramBotService
+    private readonly telegramBotService: TelegramBotService,
+    private readonly notificationService: NotificationService
     ) {}
 
   @Get()
@@ -72,7 +74,7 @@ export class AppController {
     @Body() data: any,
     @GetUser() user: User,
   ): Promise<any> {
-    return this.telegramBotService.sendAnnouncementMessage(data, user);
+    return this.notificationService.sendAnnouncementMessage(data, user);
   }
   @MetaPermissions(Permissions.notify)
   @UseGuards(JwtAuthGuard)
