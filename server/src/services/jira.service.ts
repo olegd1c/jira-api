@@ -331,17 +331,49 @@ export class JiraService {
         return items;
     }
 
+    private async initJiraApiBot() {
+        const username = this.configService.get<string>('JIRA_API_BOT_LOGIN');
+        const token = this.configService.get<string>('JIRA_API_BOT_TOKEN');
+
+        try {
+            return await this.getJiraApi({ username, token } as User);
+        } catch (e) {
+            this.logger.error(`Помилка ініціалізації Jira API бота: ${e.message}`);
+            return null;
+        }
+    }
+
     async getJiraApi(user: User): Promise<any> {
-        jiraApi = new JiraApi({
+        const jiraOptions: any = {
             protocol: apiConfig.protocol,
             host: apiConfig.host,
-            username: user.username,
-            bearer: user.token,
             apiVersion: apiConfig.apiVersion,
             strictSSL: apiConfig.strictSSL
-        });
+        };
 
-        return jiraApi.getCurrentUser();
+        if (user.token) {
+            // Якщо є токен, використовуємо тільки його (Bearer PAT)
+            jiraOptions.bearer = user.token;
+            this.logger.debug(`Ініціалізація Jira API з токеном для користувача: ${user.username}`);
+        } else if (user.username && user.password) {
+            // Якщо токена немає, використовуємо логін/пароль (Basic Auth)
+            jiraOptions.username = user.username;
+            jiraOptions.password = user.password;
+            this.logger.debug(`Ініціалізація Jira API з паролем для користувача: ${user.username}`);
+        } else {
+            throw new UnauthorizedException('Не надано облікових даних (токен або пароль)');
+        }
+
+        jiraApi = new JiraApi(jiraOptions);
+
+        try {
+            const currentUser = await jiraApi.getCurrentUser();
+            this.logger.log(`Успішне підключення до Jira: ${currentUser.displayName || currentUser.name}`);
+            return currentUser;
+        } catch (err) {
+            this.logger.error(`Помилка авторизації Jira: ${err.message}`);
+            throw err;
+        }
     }
 
     async getIssueAnnouncement(key: string): Promise<any> {
@@ -426,18 +458,6 @@ export class JiraService {
                 this.logger.error(`Помилка оновлення story points для ${task.key}: ${err.message}`);
             }
         }));
-    }
-
-    private async initJiraApiBot() {
-        const username = this.configService.get<string>('JIRA_API_BOT_LOGIN');
-        const token = this.configService.get<string>('JIRA_API_BOT_TOKEN');
-
-        try {
-            return await this.getJiraApi({ username, token } as User);
-        } catch (e) {
-            this.logger.error(`Помилка ініціалізації Jira API бота: ${e.message}`);
-            return null;
-        }
     }
 }
 

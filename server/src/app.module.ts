@@ -26,14 +26,11 @@ import UserService from './controllers/user/user.service';
 import TeamService from './controllers/team/team.service';
 import TasksModule from './controllers/task/task.module';
 
-ConfigModule.forRoot({
-  envFilePath: ['.env.local', '.env'],
-})
-
 @Module({
   imports: [
     AuthModule,
     ConfigModule.forRoot({
+      envFilePath: ['.env.local', '.env'],
       isGlobal: true
     }),
     HttpModule,

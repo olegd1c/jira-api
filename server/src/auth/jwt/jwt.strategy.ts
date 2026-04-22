@@ -5,6 +5,7 @@ import { JwtPayload } from './jwt-payload.interface';
 import { User } from '@models/user.model';
 import { JiraService } from 'src/services/jira.service';
 import { ConfigService } from '@nestjs/config';
+import { decrypt } from '../../utils/crypto.helper';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,22 +21,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     async validate(payload: JwtPayload): Promise<User> {
         const { username, password, permissions } = payload;
-        let user = { username, password, permissions };
+        const secret = this.configService.get('JWT_SECRET');
+        let user = { 
+            username: decrypt(username, secret), 
+            password: decrypt(password, secret), 
+            permissions 
+        };
 
         let result;
         try {
             result = await this.jiraService.getJiraApi(user);
-        } catch(e) {
+        } catch (e) {
 
         }
-        
-        //const user = this.userRepository.findOne({ username });
 
         if (!result) {
             user = null;
             throw new UnauthorizedException('');
         }
-        user = Object.assign(user, {displayName: result.displayName})
+        user = Object.assign(user, { displayName: result.displayName })
         return user;
     }
 }

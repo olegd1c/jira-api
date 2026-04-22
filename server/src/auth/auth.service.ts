@@ -7,6 +7,7 @@ import { Permissions } from '@shared_models/permission.enum';
 import { JiraService } from 'src/services/jira.service';
 import { ConfigService } from '@nestjs/config';
 import UserService from "@app/controllers/user/user.service";
+import { encrypt } from '../utils/crypto.helper';
 
 const configService = new ConfigService();
 
@@ -17,26 +18,26 @@ export class AuthService {
         private jwtService: JwtService,
         private jiraService: JiraService,
         private userService: UserService,
-    ) {}
+    ) { }
 
-    async signIn(authCredentialsDto: AuthCredentialsDto): Promise<{accessToken: string, username: string, permissions: string[]}> {
-       const username = authCredentialsDto.username;
-       const password = authCredentialsDto.password;
+    async signIn(authCredentialsDto: AuthCredentialsDto): Promise<{ accessToken: string, username: string, permissions: string[] }> {
+        const username = authCredentialsDto.username;
+        const password = authCredentialsDto.password;
 
-       const user = {username, password};
-       let result;
+        const user = { username, password };
+        let result;
 
-       try {
-           result = await this.jiraService.getJiraApi(user);
-       } catch(e) {
+        try {
+            result = await this.jiraService.getJiraApi(user);
+        } catch (e) {
 
-       }
+        }
 
-       if (!result) {
-           throw new UnauthorizedException('Invalid credentials');
-       }
+        if (!result) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
-       let permissions = [Permissions.view];
+        let permissions = [Permissions.view];
 
         const notifUsersSet = new Set(configService.get<string>('NOTIFICATION_USERS', '').split(','));
         const usersExecutors = await this.userService.findExecutors('jiraLogin');
@@ -54,9 +55,14 @@ export class AuthService {
             permissions.push(Permissions.reminder);
         }
 
-       const payload: JwtPayload = { username, password, permissions };
-       const accessToken = this.jwtService.sign(payload, {secret: configService.get('JWT_SECRET')});
+        const secret = configService.get('JWT_SECRET');
+        const payload: JwtPayload = { 
+            username: encrypt(username, secret), 
+            password: encrypt(password, secret), 
+            permissions 
+        };
+        const accessToken = this.jwtService.sign(payload, { secret });
 
-       return {accessToken: accessToken, username: result.displayName, permissions: permissions};
+        return { accessToken: accessToken, username: result.displayName, permissions: permissions };
     }
 }
