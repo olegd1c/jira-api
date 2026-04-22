@@ -57,6 +57,67 @@ export function parseMissingTimeTasks(tasks: Task[], users: UserMeeting[]): Meet
     return { title, users: [] } as any;
 }
 
+export function prepareCardV2MissingTime(tasks: Task[], users: UserMeeting[]): any {
+    const widgets = [];
+
+    tasks.forEach((item: Task) => {
+        let devInfo = '';
+        const fUser = users.find((u) => u.jiraLogin == item.devName);
+        if (fUser) {
+            const mention = fUser.email ? ` (<users/${fUser.email}>)` : '';
+            devInfo = `👤 <b>${fUser.name}</b>${mention}`;
+        } else {
+            devInfo = `👤 <b>${item.devName}</b>`;
+        }
+
+        widgets.push({
+            decoratedText: {
+                topLabel: item.key,
+                text: item.summary,
+                bottomLabel: devInfo,
+                startIcon: {
+                    knownIcon: "CLOCK"
+                },
+                button: {
+                    text: "Jira",
+                    onClick: {
+                        openLink: {
+                            url: item.link
+                        }
+                    }
+                }
+            }
+        });
+        
+        widgets.push({ divider: {} });
+    });
+
+    if (widgets.length > 0) {
+        widgets.pop(); // Видаляємо останній роздільник
+    }
+
+    return {
+        cardsV2: [
+            {
+                cardId: "missingTimeCard",
+                card: {
+                    header: {
+                        title: "⏳ Time Tracking Reminder",
+                        subtitle: "Будь ласка, заповніть фактичний час розробки",
+                        imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/clock/default/24px.svg",
+                        imageType: "CIRCLE"
+                    },
+                    sections: [
+                        {
+                            widgets: widgets
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+}
+
 export function prepareMessageWebHook(item: Meeting, sendAll = false): string {
     let mess = '';
     mess = mess + item.title + "\n";

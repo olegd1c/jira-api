@@ -42,9 +42,8 @@ export class GoogleChatService {
         this.sendNotifyWebHook(meeting, webHook);
     }
 
-    sendNotifyWebHook(meeting: Meeting, webhookUrl: string, sendAll = false) {
+    sendNotifyWebHook(data: Meeting | any, webhookUrl: string, sendAll = false) {
         const requestId = Math.random().toString(36).substring(7);
-        //this.logger.debug(`[${requestId}] sendNotifyWebHook, sendAll: ${sendAll}`);
 
         if (!webhookUrl || !webhookUrl.trim()) {
             this.logger.warn(`[${requestId}] Webhook URL is missing or empty`);
@@ -52,12 +51,17 @@ export class GoogleChatService {
         }
 
         const cleanUrl = webhookUrl.trim();
-        const message = prepareMessageWebHook(meeting, sendAll);
-        const payload = { text: message };
+        let payload: any;
 
-        if (!message) {
-            this.logger.debug(`[${requestId}] Message is empty, skipping`);
-            return;
+        if (data && data.cardsV2) {
+            payload = data;
+        } else {
+            const message = prepareMessageWebHook(data, sendAll);
+            if (!message) {
+                this.logger.debug(`[${requestId}] Message is empty, skipping`);
+                return;
+            }
+            payload = { text: message };
         }
 
         //this.logger.debug(`[${requestId}] Sending webhook to ${cleanUrl}`);

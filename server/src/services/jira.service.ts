@@ -160,10 +160,14 @@ export class JiraService {
         }
 
         const sprints = await this.getAllSprints({ boardId, state: StateSprint.active });
-        const sprintId = sprints.values[0]['id'];
-        const params = { boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview'] };
+        if (sprints?.values?.length) {
+            const sprintId = sprints.values[0]['id'];
+            const params = { boardId, sprintsId: [sprintId], statusesTask: ['ForReview', 'InReview'] };
 
-        return await this.getAllTasks(params);
+            return await this.getAllTasks(params);
+        }
+
+        return [];
     }
 
     async getTaskForBuild(params: { boardId: number }): Promise<any> {
