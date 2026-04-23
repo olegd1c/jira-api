@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
-import { Params } from "@app/params";
+import { ParamsFilter, ParentFilter } from '@models/filter.model';
+import {UserMeetingService} from "@components/reminder/components/user-meeting/user-meeting.service";
 
 @Component({
   selector: 'app-announcements',
@@ -14,16 +15,21 @@ export class AnnouncementsComponent implements OnInit {
   searchForm: FormGroup;
   announcementForm: FormGroup;
   announcementText = '';
-  confirmList = Params.confirmList;
-  executorList = Params.executorList;
+  confirmList: string[] = [];
+  executorList: string[] = [];
+  links = '';
+  sending = false;
+  taskForBuild = [];
+  parentFilter = ParentFilter;
 
-  get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray };
+  get tasksForm(): FormArray { return this.announcementForm.get('tasks') as FormArray; }
 
   loading = false;
 
   constructor(
     private fb: FormBuilder,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private userMeetingService: UserMeetingService,
   ) { }
 
   ngOnInit(): void {
@@ -39,27 +45,45 @@ export class AnnouncementsComponent implements OnInit {
     });
 
     this.announcementForm.valueChanges.subscribe(
-      data => this.onValueChanged());
+      () => this.onValueChanged());
     this.onValueChanged();
+
+    this.getParams();
   }
 
   onValueChanged() {
     this.prepareText();
   }
 
-  search() {
+  search(number?: string) {
     this.loading = true;
-    this.taskService.getTaskAnnouncement({ number: this.searchForm.controls.number.value })
-    .then(result => {
-      let tempV: any[] = this.tasksForm.value;
-      let fItem = tempV.find(item => item.key ===  result.key);
-      if(!fItem) {
-        this.tasksForm.push(this.initTaskForm(result));
-      }
+    const numberTask: string = this.searchForm.controls.number.value || number;
+    let numbers = [];
 
-      this.searchForm.reset();
-      this.loading = false;
-    }).catch(() => this.loading = false);
+    if (numberTask.split(';').length) {
+      numbers = numberTask.split(';');
+    } else {
+      numbers.push(numberTask);
+    }
+
+    numbers.map(n => {
+      this.taskService.getTaskAnnouncement({ number: n })
+        .then(result => {
+          this.addToForm(result);
+
+          this.links = result?.links;
+
+          this.searchForm.reset();
+          this.loading = false;
+        }).catch(() => this.loading = false);
+    });
+  }
+
+  addToForm(task: any) {
+    if (!task.isAdd) {
+      this.tasksForm.push(this.initTaskForm(task));
+      task.isAdd = true;
+    }
   }
 
   private initTaskForm(item: TaskAnnouncement): FormGroup {
@@ -80,11 +104,15 @@ export class AnnouncementsComponent implements OnInit {
       ]],
       summary: [item.summary, [
         Validators.required
+      ]],
+      info: [item.info, [
+
       ]]
     });
   }
 
   sendAnnouncement() {
+    this.sending = true;
     this.taskService.sendAnnouncement({message: this.announcementText}).then(
       result => {
         if (result) {
@@ -95,11 +123,18 @@ export class AnnouncementsComponent implements OnInit {
           }
           this.announcementText = '';
         }
-      });
+        this.sending = false;
+      }).catch(() => {
+        this.sending = true;
+    });
 
   }
 
-  deleteTask(index) {
+  deleteTask(index, key) {
+    const task = this.taskForBuild.filter(item => item.key === key);
+    if (task.length) {
+      task[0].isAdd = false;
+    }
     this.tasksForm.removeAt(index);
   }
 
@@ -107,17 +142,61 @@ export class AnnouncementsComponent implements OnInit {
     const data = this.announcementForm.value;
     const date = data.date ? new Date(data.date).toLocaleString() : '';
     this.announcementText =
-      'Планируемая дата выливки ' + date + "\n\n";
+      'Запланована дата виливки ' + date + '\n\n';
     data.tasks.map(item => {
       this.announcementText = this.announcementText +
       item.link + ' ' +
-      item.summary + "\n" +
-      'Исполнитель: ' + item.devName + "\n" +
-      'Тестировщик: ' + item.testName + "\n" +
-      'Подтверждение бизнеса: ' + item.confirm + "\n";
+      item.summary + '\n' +
+      (item.info ? (item.info + '\n') : '') +
+      'Виконавець: ' + item.devName + '\n' +
+      'Тестувальник: ' + item.testName + '\n' +
+      'Підтвердження бізнесу: ' + item.confirm + '\n';
     });
     this.announcementText = this.announcementText +
-      'Выливает: ' + data.executor + "\n\n";
+      'Виливає: ' + data.executor + '\n\n';
+  }
+
+  changeConfirm(event) {
+
+    this.tasksForm.controls.map(elem => {
+      if (!elem.get('confirm').value) {
+        elem.patchValue({confirm: event.target.value});
+      }
+    });
+  }
+
+  onSearch($event: ParamsFilter) {
+    if ($event) {
+      const params: ParamsFilter = $event;
+      this.getTasksForBuild(params);
+    } else {
+      this.taskForBuild = [];
+    }
+  }
+
+  private getTasksForBuild(params: ParamsFilter) {
+    this.loading = true;
+    this.taskService.getTasksForBuild(params).then(result => {
+      this.taskForBuild = result;
+      this.loading = false;
+    }).catch(() => {
+      this.taskForBuild = [];
+      this.loading = false;
+    });
+  }
+
+  private getParams(): void {
+    this.userMeetingService.getConfirms().then(result => {
+      this.confirmList = result.map(user => user.name);
+    }).catch(() => {
+      this.confirmList = [];
+    });
+
+    this.userMeetingService.getExecutors().then(result => {
+      this.executorList = result.map(user => user.name);
+    }).catch(() => {
+      this.executorList = [];
+    });
   }
 
 }

@@ -9,7 +9,10 @@ export interface Task {
     sprintName: string;
     sprintsName: string;
     reviewers: [];
+    reviews_conducted: [],
     link: string;
+    summary: string;
+    actualTimeDev?: number;
 }
 
 export interface Analytics {
@@ -54,4 +57,7 @@ export interface TaskAnnouncement {
     summary: string;
     link: string;
     key: string;
+    links?: string;
+    release: string;
+    info?: string;
 }

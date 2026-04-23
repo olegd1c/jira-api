@@ -1,29 +1,47 @@
-import {Component, OnInit, Output, EventEmitter, Input, OnChanges, OnDestroy} from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Output,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  ViewChild,
+  ChangeDetectorRef,
+  AfterViewInit,
+} from '@angular/core';
 import {TaskService} from '@services/task.service';
 import {FormControl} from '@angular/forms';
 import {SprintSearch} from 'src/app/models/search.model';
-import {debounceTime, distinctUntilChanged, switchMap, takeUntil} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, switchMap, takeUntil} from 'rxjs/operators';
 import {Subject} from 'rxjs';
 import {LocalStorageHelper} from '@app/helpers/localStorage.helper';
 import {ParamsFilter, ParentFilter, statusesTask} from '@models/filter.model';
+import {ScrollDispatcher} from "@angular/cdk/overlay";
+import {CdkVirtualScrollViewport} from "@angular/cdk/scrolling";
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   styleUrls: ['./filters.component.scss']
 })
-export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
+export class FiltersComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() reload: boolean;
   @Input() parent: ParentFilter;
   @Output() search: EventEmitter<ParamsFilter> = new EventEmitter();
 
+  @ViewChild(CdkVirtualScrollViewport) virtualScroll!: CdkVirtualScrollViewport;
+  virtualScrollHeight: number;
+  suggestItemHeight = 52;
+  currentPage = 1;
+  maxCurrent = 0;
+
   loading = false;
   loadingSprint = false;
-  sprints: any[];
+  sprints: any[] = [];
   boards: any[];
   selectedSprints: number[] = [];
   nameBoard: FormControl = new FormControl('');
-  onlyInProgress: FormControl = new FormControl(false);
   parentFilter = ParentFilter;
   private nameFilter = 'nameBoard';
   private alive$: Subject<void> = new Subject<void>();
@@ -37,7 +55,11 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
   statusesTask = statusesTask;
   selectedStatus: string[] = [];
 
-  constructor(private taskService: TaskService) {
+  constructor(
+    private taskService: TaskService,
+    private scrollDispatcher: ScrollDispatcher,
+    private cd: ChangeDetectorRef,
+    ) {
   }
 
   ngOnInit(): void {
@@ -67,7 +89,7 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe(res => {
         this.boards = res;
         this.loading = false;
-      }, err => {
+      }, () => {
         this.loading = false;
         this.boards = [];
       });
@@ -75,20 +97,56 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
 
   private getSprints(params: SprintSearch, add = false) {
     this.loadingSprint = true;
-    this.taskService.getSprints(params).then(result => {
-      if (result) {
-        this.metaSearch = result.meta;
-        if (add) {
-          result.values.map(item => {
-            this.sprints.push(item);
-          });
-        } else {
-          this.sprints = result.values;
+    this.taskService.getSprints(params)
+      .pipe(takeUntil(this.alive$))
+      .subscribe(result => {
+        if (result) {
+          if (add) {
+            result.values.map(item => {
+              this.sprints.push(item);
+            });
+          } else {
+            this.sprints = result.values;
+          }
         }
-      }
 
-      this.loadingSprint = false;
-    });
+        this.loadingSprint = false;
+      });
+  }
+
+  private getAllSprintsReversed(params: SprintSearch, add = false) {
+    this.loadingSprint = true;
+    this.taskService.getAllSprintsReversed(params)
+      .pipe(takeUntil(this.alive$))
+      .subscribe(result => {
+        if (result) {
+            this.sprints = result;
+            this.metaSearch.isLast = true;
+        }
+
+        this.loadingSprint = false;
+      });
+  }
+
+  loadMoreSprints(): void {
+    if (!this.metaSearch.isLast) {
+
+      this.loadingSprint = true;
+      this.currentPage++;
+      this.taskService.getSprints(        {
+        boardId: this.boarId,
+        start: this.metaSearch.start + this.metaSearch.pageSize,
+        pageSize: this.metaSearch.pageSize
+      })
+        .pipe(takeUntil(this.alive$))
+        .subscribe(result => {
+          this.metaSearch = result.meta;
+          const data = result.values;
+          this.sprints = [...this.sprints, ...data];
+          this.loadingSprint = false;
+          this.cd.detectChanges();
+        });
+    }
   }
 
   onChange(id: number, isChecked: boolean) {
@@ -119,19 +177,13 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
 
   onChangeBoard(id) {
     this.boarId = id;
-    this.getSprints({boardId: id});
-    this.sprints = [];
-    this.search.emit(null);
-  }
-
-  addSprints() {
-    this.getSprints(
-      {
-        boardId: this.boarId,
-        start: this.metaSearch.start + this.metaSearch.pageSize,
-        pageSize: this.metaSearch.pageSize
-      }
-      , true);
+    if (this.parent === this.parentFilter.announcement) {
+      this.search.emit({boardId: id});
+    } else {
+      this.getAllSprintsReversed({boardId: id});
+      this.sprints = [];
+      this.search.emit(null);
+    }
   }
 
   ngOnDestroy() {
@@ -146,5 +198,27 @@ export class FiltersComponent implements OnInit, OnChanges, OnDestroy {
 
   private setFilterNameBoard(value: string) {
     LocalStorageHelper.setFilters(this.nameFilter, value);
+  }
+
+  setVirtualScrollHeight(): void {
+    if (this.sprints.length > 10) {
+      this.virtualScrollHeight = 400;
+    } else {
+      this.virtualScrollHeight = (this.sprints.length * this.suggestItemHeight) / 1.3;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollDispatcher.scrolled()
+      .pipe(
+        takeUntil(this.alive$),
+        debounceTime(100), // щоб зменшити частоту
+        filter(() => !this.loadingSprint), // не запускати, поки ще не завершив попереднє
+        filter(() => !!this.virtualScroll),
+        filter(() => this.virtualScroll.measureScrollOffset('bottom') < 20)
+      )
+      .subscribe(() => {
+        this.loadMoreSprints();
+      });
   }
 }

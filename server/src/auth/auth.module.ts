@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport'
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { JiraService } from 'src/services/jira.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import UserModule from "@app/controllers/user/user.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -7,7 +7,8 @@
     <div class="my-2" *hasPermission="[permissions.notify]">
       <button [disabled]="loadingStoryPoints" *ngIf="storySprintEmpty && storySprintEmpty.length" (click)="updateStoryPoints()">Оновити поінти задачі</button>
     </div>
-    <table border="1">
+    <table class="table table-striped">
+      <thead>
         <tr>
             <th class="col">Спрінт</th>
             <th class="col">Задача</th>
@@ -18,7 +19,8 @@
             <th class="col">Поінти задачі</th>
             <th class="col">Спрінти</th>
         </tr>
-
+      </thead>
+      <tbody>
         <tr *ngFor="let item of tasks">
             <td class="col">{{item.sprintName}}</td>
             <td class="col"><a [href]="item.link" target="_blank" rel="noopener">{{item.key}}</a></td>
@@ -29,6 +31,6 @@
             <td class="col">{{item.pointStory}}</td>
             <td class="col">{{item.sprintsName}}</td>
         </tr>
-
+      </tbody>
     </table>
 </div>

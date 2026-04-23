@@ -6,3 +6,9 @@ export interface Sprint {
     endDate: string;
     completeDate: number;
 }
+
+export enum StateSprint {
+    future = "future",
+    active = "active",
+    closed = "closed"
+}

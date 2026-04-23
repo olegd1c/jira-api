@@ -6,7 +6,7 @@
     "paths": {
       "@app/*": [
         "src/app/*"
-      ],      
+      ],
       "@environments/*": [
         "environments/*"
       ],
@@ -24,8 +24,8 @@
       ],
       "@test/*": [
         "../e2e/*"
-      ],     
-    },
+      ]
+    }
   },
   "files": [
     "src/main.ts",

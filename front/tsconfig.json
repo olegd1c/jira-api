@@ -7,14 +7,38 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "module": "esnext",
+    "module": "ES2022",
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2015",
+    "useDefineForClassFields": false,
+    "target": "ES2022",
     "lib": [
-      "es2018",
+      "ES2022",
       "dom"
     ],
+    "paths": {
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@environments/*": [
+        "environments/*"
+      ],
+      "@services/*": [
+        "src/app/services/*"
+      ],
+      "@components/*": [
+        "src/app/components/*"
+      ],
+      "@models/*": [
+        "src/app/models/*"
+      ],
+      "@shared_models/*": [
+        "../shared/models/*"
+      ],
+      "@test/*": [
+        "../e2e/*"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

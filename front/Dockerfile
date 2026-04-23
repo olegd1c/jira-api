@@ -1,20 +1,22 @@
-FROM node:12-alpine
+FROM node:20 AS builder
 
-RUN mkdir /home/node/front
-RUN mkdir /home/node/shared
+WORKDIR /shared
+COPY shared/ ./
 
-#WORKDIR /home/node/shared
-COPY ./shared /home/node/shared
+WORKDIR /app
 
-WORKDIR /home/node/front
-COPY ./front /home/node/front
+# 1. Копіюємо тільки файли залежностей
+COPY front/package*.json ./
 
-#RUN npm config set registry http://registry.npmjs.org
+# 2. Встановлюємо залежності (шар закешується)
 RUN npm install
 
+# 3. Копіюємо решту Angular-проєкту
+COPY front/ ./
+RUN npm run build -- --configuration production
+
+FROM nginx:alpine
+COPY --from=builder /app/dist/jira-front /usr/share/nginx/html
+
 EXPOSE 4200
-
-CMD ["npm", "run", "start-docker"]
-
-#docker build -t jira-api-front .
-#docker run -p 3008:3008 --name	jira-api-front
+CMD ["nginx", "-g", "daemon off;"]

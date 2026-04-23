@@ -1,28 +1,63 @@
-version: "3"
-services:
-  #nest-api:
-  #  container_name: nest-api
-  #  build:
-  #    context: .
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - 3000:3000
-    #depends_on:
-    #  - postgres
+version: "3.9"
 
-  jira-api-server:
+services:
+  mongo:
+    image: mongo:8
+    container_name: mongo
+    restart: always
+    ports:
+      - "27117:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  angular-app:
     build:
       context: .
-      dockerfile: ./server/Dockerfile
+      dockerfile: front/Dockerfile
+    container_name: angular-app
+    ports:
+      - "3008:80"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  nest-api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: nest-api
+    restart: always
     ports:
       - "3007:3007"
-    #command: npm start
-    #  env_file:
-    #    - .env
+    env_file:
+      - server/.env
+      - server/.env.local
+    depends_on:
+      - mongo
+    environment:
+      NODE_ENV: production
+    networks:
+      - app-network
 
-  jira-api-front:
-    build:
-      context: .
-      dockerfile: ./front/Dockerfile
+  nginx:
+    image: nginx:1.25
+    container_name: nginx
     ports:
-      - "3008:3008"
+      - "80:80"
+    volumes:
+      - ./conf/nginx/jira-front.dev.conf:/etc/nginx/jira-front.dev.conf
+      - ./conf/nginx/jira-api.dev.conf:/etc/nginx/jira-api.dev.conf
+    depends_on:
+      - angular-app
+      - nest-api
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

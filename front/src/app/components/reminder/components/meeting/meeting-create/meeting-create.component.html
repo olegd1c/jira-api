@@ -1,0 +1,86 @@
+<div class="page-content inset">
+  <div class="row">
+    <div class="col-md-12">
+      <!-- main app container -->
+      <div class="jumbotron">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-8">
+              <h2>Зустріч</h2>
+              <form [formGroup]="dataForm" (ngSubmit)="create()">
+                <div class="form-group">
+                  <label for="team">Команда</label>
+                  <select formControlName="team" class="form-control">
+                    <option *ngFor="let team of teams" [value] = "team._id">
+                      {{team.name}}
+                    </option>
+                  </select>
+                  <div *ngIf="submitted && f.team.errors" class="invalid-feedback">
+                    <div *ngIf="f.team.errors.required">Назва команди обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="title">Заголовок</label>
+                  <input type="text" formControlName="title" placeholder="Стендап 10:30"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.title.errors }" />
+                  <div *ngIf="submitted && f.title.errors" class="invalid-feedback">
+                    <div *ngIf="f.title.errors.required">Заголовок обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="time">Час</label>
+                  <input type="text" formControlName="time" placeholder="10:30"
+                         class="form-control" [ngClass]="{ 'is-invalid': submitted && f.time.errors }" />
+                  <div *ngIf="submitted && f.time.errors" class="invalid-feedback">
+                    <div *ngIf="f.time.errors.required">Час обов"язковий</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="cronTime">Дні запуску</label>
+                  <select formControlName="cronTime" class="form-control">
+                    <option *ngFor="let dayCron of tmpDaysCron" [value] = "dayCron.id">
+                      {{dayCron.name}}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="weekType">Тижні запуску</label>
+                  <select formControlName="weekType" class="form-control">
+                    <option *ngFor="let weekType of tmpWeeksType" [value] = "weekType.id">
+                      {{weekType.name}}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="status">Статус</label>
+                  <select formControlName="status" class="form-control">
+                    <option *ngFor="let value of statuses" [value] = "value">
+                      {{value}}
+                    </option>
+                  </select>
+                  <div *ngIf="submitted && f.team.errors" class="invalid-feedback">
+                    <div *ngIf="f.team.errors.required">Cтатус обов"язковий</div>
+                  </div>
+                </div>
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                  <div class="btn-group mr-2" role="group" aria-label="First group">
+                    <button [disabled]="submitted" type="submit" class="btn btn-primary">
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      Записати
+                    </button>
+                  </div>
+                  <div class="btn-group mr-2" role="group" aria-label="Second group">
+                    <button (click)="Cancel()" class="btn btn-primary">
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      Відмінити
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
