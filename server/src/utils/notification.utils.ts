@@ -146,3 +146,80 @@ export function prepareMessage(item: Meeting): string {
 
     return mess;
 }
+
+export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): any {
+    const widgets: any[] = [];
+
+    if (!tasks || tasks.length === 0) {
+        return null;
+    }
+
+    tasks.forEach((item: Task) => {
+        let reviewersList: string[] = [];
+        
+        item.reviewers.forEach((reviewer: string) => {
+            const fUser = users.find((u) => u.jiraLogin == reviewer);
+            let reviewerDisplay = reviewer;
+            
+            if (fUser) {
+                reviewerDisplay = fUser.name;
+                const fReviewsConducted = item.reviews_conducted.filter((elem) => elem == reviewer);
+                if (fReviewsConducted.length == 0) {
+                    if (fUser.email) {
+                        reviewerDisplay += ` (<users/${fUser.email}>)`;
+                    }
+                } else {
+                    reviewerDisplay += ' ✅';
+                }
+            }
+            reviewersList.push(`👤 <b>${reviewerDisplay}</b>`);
+        });
+
+        widgets.push({
+            decoratedText: {
+                topLabel: item.key,
+                text: item.summary,
+                bottomLabel: reviewersList.join('<br>'),
+                wrapText: true,
+                startIcon: {
+                    knownIcon: "PERSON"
+                },
+                button: {
+                    text: "Jira",
+                    onClick: {
+                        openLink: {
+                            url: item.link
+                        }
+                    }
+                }
+            }
+        });
+        
+        widgets.push({ divider: {} });
+    });
+
+    if (widgets.length > 0) {
+        widgets.pop(); // Видаляємо останній роздільник
+    }
+
+    return {
+        cardsV2: [
+            {
+                cardId: "reviewTasksCard",
+                card: {
+                    header: {
+                        title: "👀 Code Review Reminder",
+                        subtitle: "Задачі, які очікують на ревью",
+                        imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rate_review/default/24px.svg",
+                        imageType: "CIRCLE"
+                    },
+                    sections: [
+                        {
+                            widgets: widgets
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+}

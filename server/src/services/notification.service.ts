@@ -5,7 +5,7 @@ import { Meeting, MeetingDocument } from '@app/controllers/meeting/meeting.schem
 import { User } from '@app/models/user.model';
 import { TelegramBotService } from './telegram-bot.service';
 import { GoogleChatService } from './google-chat.service';
-import { parseReviewTasks, prepareCardV2MissingTime } from '../utils/notification.utils';
+import { parseReviewTasks, prepareCardV2MissingTime, prepareCardV2ReviewTasks } from '../utils/notification.utils';
 
 @Injectable()
 export class NotificationService {
@@ -31,13 +31,9 @@ export class NotificationService {
 
     async sendNotifyTasks(team: Team, tasks: Task[]) {
         if (tasks.length) {
-            const data: Meeting[] = parseReviewTasks(tasks, team.users);
-
-            data.forEach((task) => {
-                //this.telegramBotService.sendNotifyTelegram(task, team.reviewChatId);
-                const webhookUrl = team.review_url || team.chat_url;
-                this.googleChatService.sendNotifyWebHookReview(task, webhookUrl);
-            });
+            const cardPayload = prepareCardV2ReviewTasks(tasks, team.users);
+            const webhookUrl = team.review_url || team.chat_url;
+            this.googleChatService.sendNotifyWebHookReview(cardPayload, webhookUrl);
         }
     }
 
