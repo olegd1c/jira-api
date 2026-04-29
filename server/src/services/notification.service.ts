@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Task } from '@shared_models/task.model';
 import { Team } from '@app/controllers/team/team.schema';
-import { Meeting, MeetingDocument } from '@app/controllers/meeting/meeting.schema';
+import { MeetingDocument } from '@app/controllers/meeting/meeting.schema';
 import { User } from '@app/models/user.model';
+import { AnnouncementPayload } from '@shared_models/announcement.model';
 import { TelegramBotService } from './telegram-bot.service';
 import { GoogleChatService } from './google-chat.service';
 import { parseReviewTasks, prepareCardV2MissingTime, prepareCardV2ReviewTasks } from '../utils/notification.utils';
@@ -16,7 +17,7 @@ export class NotificationService {
         private googleChatService: GoogleChatService,
     ) { }
 
-    async sendAnnouncementMessage(data: { message: string }, user: User): Promise<any> {
+    async sendAnnouncementMessage(data: AnnouncementPayload, user: User): Promise<any> {
         return await this.googleChatService.sendAnnouncementWebHook(data, user);
     }
 

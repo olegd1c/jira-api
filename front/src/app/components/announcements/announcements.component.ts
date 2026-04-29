@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TaskService } from '@services/task.service';
 import { TaskAnnouncement } from '@shared_models/task.model';
-import { ParamsFilter, ParentFilter } from '@models/filter.model';
+import {ParamsFilter, ParentFilter} from '@models/filter.model';
 import {UserMeetingService} from "@components/reminder/components/user-meeting/user-meeting.service";
+import { AnnouncementPayload, AnnouncementData } from '@shared_models/announcement.model';
 
 @Component({
   selector: 'app-announcements',
@@ -113,7 +114,11 @@ export class AnnouncementsComponent implements OnInit {
 
   sendAnnouncement() {
     this.sending = true;
-    this.taskService.sendAnnouncement({message: this.announcementText}).then(
+    const payload: AnnouncementPayload = {
+      message: this.announcementText,
+      data: this.announcementForm.value as AnnouncementData
+    };
+    this.taskService.sendAnnouncement(payload).then(
       result => {
         if (result) {
           this.announcementForm.reset();

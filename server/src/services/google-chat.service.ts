@@ -3,7 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Meeting } from '@app/controllers/meeting/meeting.schema';
 import { HttpService } from "@nestjs/axios";
-import { prepareMessageWebHook } from '../utils/notification.utils';
+import { prepareMessageWebHook, prepareCardV2Announcement } from '../utils/notification.utils';
+import { AnnouncementPayload } from '@shared_models/announcement.model';
 
 @Injectable()
 export class GoogleChatService {
@@ -15,14 +16,20 @@ export class GoogleChatService {
         private configService: ConfigService,
     ) { }
 
-    async sendAnnouncementWebHook(data: { message: string }, user: User): Promise<boolean> {
+    async sendAnnouncementWebHook(data: AnnouncementPayload, user: User): Promise<boolean> {
         const announcementWebhook = this.configService.get('ANNOUNCEMENT_WEB_HOOK');
         if (announcementWebhook) {
-            const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
-            const payload = { text: message };
-            if (!message) {
-                return false;
+            let payload: any;
+            if (data.data) {
+                payload = prepareCardV2Announcement(data.data, user);
+            } else {
+                const message = data.message + 'Автор повідомлення: ' + user.displayName + "\n\n";
+                if (!message) {
+                    return false;
+                }
+                payload = { text: message };
             }
+
             try {
                 const result = await this.httpService.post(announcementWebhook, payload).toPromise();
                 return result && result.status == 200 ? true : false;

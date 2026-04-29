@@ -2,6 +2,7 @@ import { Task } from '@shared_models/task.model';
 import { Meeting } from '@app/controllers/meeting/meeting.schema';
 import { User as UserMeeting } from '@app/controllers/user/user.schema';
 import { StatusUser } from "@shared_models/users.model";
+import { AnnouncementData, AnnouncementTask } from "@shared_models/announcement.model";
 
 export function parseReviewTasks(tasks: Task[], users: UserMeeting[]): Meeting[] {
     let title = 'Задача в ревью: ' + "\n";
@@ -211,6 +212,80 @@ export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): a
                         title: "👀 Code Review Reminder",
                         subtitle: "Задачі, які очікують на ревью",
                         imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rate_review/default/24px.svg",
+                        imageType: "CIRCLE"
+                    },
+                    sections: [
+                        {
+                            widgets: widgets
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+}
+
+export function prepareCardV2Announcement(data: AnnouncementData, user: any): any {
+    const widgets: any[] = [];
+    const dateStr = data.date ? new Date(data.date).toLocaleString() : '';
+
+    widgets.push({
+        decoratedText: {
+            text: `<b>Запланована дата виливки:</b> ${dateStr}`,
+            startIcon: { knownIcon: "CLOCK" }
+        }
+    });
+    widgets.push({
+        decoratedText: {
+            text: `<b>Виливає:</b> ${data.executor}`,
+            startIcon: { knownIcon: "PERSON" }
+        }
+    });
+
+    widgets.push({ divider: {} });
+
+    if (data.tasks && data.tasks.length > 0) {
+        data.tasks.forEach((item: AnnouncementTask) => {
+            let taskInfo = `<b>Виконавець:</b> ${item.devName}<br><b>Тестувальник:</b> ${item.testName}<br><b>Підтвердження бізнесу:</b> ${item.confirm}`;
+            if (item.info) {
+                taskInfo = `${item.info}<br>${taskInfo}`;
+            }
+
+            widgets.push({
+                decoratedText: {
+                    topLabel: item.key,
+                    text: item.summary,
+                    bottomLabel: taskInfo,
+                    wrapText: true,
+                    startIcon: { knownIcon: "TICKET" },
+                    button: {
+                        text: "Jira",
+                        onClick: {
+                            openLink: { url: item.link }
+                        }
+                    }
+                }
+            });
+            widgets.push({ divider: {} });
+        });
+    }
+
+    widgets.push({
+        decoratedText: {
+            text: `Автор повідомлення: ${user?.displayName || user?.name || ''}`,
+            startIcon: { knownIcon: "PERSON" }
+        }
+    });
+
+    return {
+        cardsV2: [
+            {
+                cardId: "announcementCard",
+                card: {
+                    header: {
+                        title: "🚀 Реліз",
+                        subtitle: "Запланована виливка",
+                        imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rocket/default/24px.svg",
                         imageType: "CIRCLE"
                     },
                     sections: [
