@@ -7,7 +7,7 @@ run_compose() {
   local build_flag=$1
   echo "🚀 Запуск контейнерів..."
   # --remove-orphans видалить контейнери, яких більше немає в конфігу
-  docker compose --env-file .env --env-file .env.local -f docker-compose.yml up $build_flag -d --remove-orphans
+  docker compose -f docker-compose.yml up $build_flag -d --remove-orphans
   echo "✅ Готово! Контейнери запущені у фоні."
   echo "Щоб переглянути логи, виконайте: docker compose logs -f"
 }

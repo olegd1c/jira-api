@@ -35,3 +35,4 @@ lerna-debug.log*
 
 /server/.env.local
 /conf/db
+/server/mongo-backup/

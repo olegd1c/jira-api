@@ -231,7 +231,7 @@ export function prepareCardV2Announcement(data: AnnouncementData, user: any): an
 
     widgets.push({
         decoratedText: {
-            text: `<b>Запланована дата виливки:</b> ${dateStr}`,
+            text: `<b>Дата виливки:</b> ${dateStr}`,
             startIcon: { knownIcon: "CLOCK" }
         }
     });
