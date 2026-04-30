@@ -114,9 +114,13 @@ export class AnnouncementsComponent implements OnInit {
 
   sendAnnouncement() {
     this.sending = true;
+    const data = { ...this.announcementForm.value } as AnnouncementData;
+    if (data.date) {
+      data.date = (data.date as string).replace('T', ' ');
+    }
     const payload: AnnouncementPayload = {
       message: this.announcementText,
-      data: this.announcementForm.value as AnnouncementData
+      data: data
     };
     this.taskService.sendAnnouncement(payload).then(
       result => {

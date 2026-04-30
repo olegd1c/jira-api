@@ -89,7 +89,7 @@ export function prepareCardV2MissingTime(tasks: Task[], users: UserMeeting[]): a
                 }
             }
         });
-        
+
         widgets.push({ divider: {} });
     });
 
@@ -157,11 +157,11 @@ export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): a
 
     tasks.forEach((item: Task) => {
         let reviewersList: string[] = [];
-        
+
         item.reviewers.forEach((reviewer: string) => {
             const fUser = users.find((u) => u.jiraLogin == reviewer);
             let reviewerDisplay = reviewer;
-            
+
             if (fUser) {
                 reviewerDisplay = fUser.name;
                 const fReviewsConducted = item.reviews_conducted.filter((elem) => elem == reviewer);
@@ -195,7 +195,7 @@ export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): a
                 }
             }
         });
-        
+
         widgets.push({ divider: {} });
     });
 
@@ -227,17 +227,33 @@ export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): a
 
 export function prepareCardV2Announcement(data: AnnouncementData, user: any): any {
     const widgets: any[] = [];
-    const dateStr = data.date ? new Date(data.date).toLocaleString() : '';
+    let dateStr = '';
+
+    if (data.date) {
+        const d = new Date(data.date);
+
+        if (!isNaN(d.getTime())) {
+            dateStr = d.toLocaleString('sv-SE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).replace('T', ' '); // sv-SE дає формат YYYY-MM-DD
+        } else {
+            dateStr = '';
+        }
+    }
 
     widgets.push({
         decoratedText: {
-            text: `<b>Дата виливки:</b> ${dateStr}`,
+            text: `<b>Дата та час:</b> ${dateStr}`,
             startIcon: { knownIcon: "CLOCK" }
         }
     });
     widgets.push({
         decoratedText: {
-            text: `<b>Виливає:</b> ${data.executor}`,
+            text: `<b>Відповідальний:</b> ${data.executor}`,
             startIcon: { knownIcon: "PERSON" }
         }
     });
@@ -283,8 +299,7 @@ export function prepareCardV2Announcement(data: AnnouncementData, user: any): an
                 cardId: "announcementCard",
                 card: {
                     header: {
-                        title: "🚀 Реліз",
-                        subtitle: "Запланована виливка",
+                        title: "🚀 Запланований деплой",
                         imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rocket/default/24px.svg",
                         imageType: "CIRCLE"
                     },
