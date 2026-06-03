@@ -11,6 +11,7 @@ export class LoginComponent implements OnInit {
     loading = false;
     submitted = false;
     returnUrl = '/main/points';
+    errorMessage = '';
 
     constructor(
         private formBuilder: FormBuilder,
@@ -54,18 +55,36 @@ export class LoginComponent implements OnInit {
         }
 
         this.loading = true;
+        this.errorMessage = '';
         this.authenticationService.login(this.f.username.value, this.f.password.value)
             .then(
                 data => {
                     if (data) {
                         this.router.navigate([this.returnUrl]);
                     } else {
+                        this.errorMessage = 'Помилка авторизації. Перевірте логін та пароль.';
                         this.alertService.error('Помилка авторизації');
                         this.loading = false;
                     }
                 },
                 error => {
-                    this.alertService.error(error);
+                    let errMessage = 'Помилка авторизації. Перевірте логін та пароль.';
+                    
+                    // Отримуємо тіло помилки, якщо це HttpErrorResponse
+                    const backendError = error?.error || error;
+                    
+                    if (backendError && backendError.message) {
+                        if (backendError.message === 'Invalid credentials') {
+                            errMessage = 'Невірний логін або пароль.';
+                        } else {
+                            errMessage = backendError.message;
+                        }
+                    } else if (typeof error === 'string') {
+                        errMessage = error;
+                    }
+
+                    this.errorMessage = errMessage;
+                    // this.alertService.error(error); // Залишаємо глобальний алерт, якщо потрібно (наразі вимкнуто)
                     this.loading = false;
                 });
     }
