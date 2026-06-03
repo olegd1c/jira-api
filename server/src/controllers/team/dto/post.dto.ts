@@ -31,6 +31,10 @@ export class PostDto {
 
     @IsOptional()
     @IsBoolean()
+    checkTimeTracking?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
     checkMeeting?: boolean;
 
     @IsNotEmpty()

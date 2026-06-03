@@ -51,6 +51,7 @@ export class TeamCreateComponent implements OnInit {
       review_url: [''],
       boardId: [''],
       checkReview: [false],
+      checkTimeTracking: [false],
       checkMeeting: [false],
       status: [''],
     });

@@ -30,6 +30,9 @@ export class Team {
   checkReview: boolean;
 
   @Prop()
+  checkTimeTracking: boolean;
+
+  @Prop()
   checkMeeting: boolean;
 
   @Prop()

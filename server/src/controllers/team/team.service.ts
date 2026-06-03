@@ -82,7 +82,7 @@ class TeamService implements OnModuleInit {
   }
 
   async findForTimeTracking(): Promise<TeamDocument[]> {
-    return this.model.find({ checkReview: true, status: StatusTeam.active }).populate('users');
+    return this.model.find({ checkTimeTracking: true, status: StatusTeam.active }).populate('users');
   }
 
 }

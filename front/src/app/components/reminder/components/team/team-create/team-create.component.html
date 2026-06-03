@@ -71,6 +71,11 @@
                   <label class="form-check-label" for="checkReview">Запуск крона перевірки ревью</label>
                 </div>
                 <div class=" form-check">
+                  <input type="checkbox" formControlName="checkTimeTracking"
+                         class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkTimeTracking.errors }" />
+                  <label class="form-check-label" for="checkTimeTracking">Запуск крона перевірки таймінгу</label>
+                </div>
+                <div class=" form-check">
                   <input type="checkbox" formControlName="checkMeeting"
                          class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkMeeting.errors }" />
                   <label class="form-check-label" for="checkMeeting">Запуск крона перевірки зустрічей</label>
