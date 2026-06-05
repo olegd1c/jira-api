@@ -15,6 +15,11 @@ export class MeetingCronService {
 
     ) { }
 
+    async handleCronForTeam(teamId: string) {
+        const meetings = await this.meetingService.findActiveByTeam(teamId);
+        this.notificationService.sendReminderMeetings(meetings);
+    }
+
     // Секунди Хвилини Години День Місяць День_тижня
     @Cron("0 */5 08-19 * * 1-5")
     async handleCron() {

@@ -15,6 +15,21 @@ export class TimeTrackingCronService {
         private jiraService: JiraService
     ) { }
 
+    async handleCronForTeam(teamId: string) {
+        const team = await this.teamService.findOneForTimeTracking(teamId);
+        this.logger.debug('TimeTrackingCronService: ', team.name);
+        if (!team) return;
+        try {
+            const tasks: Task[] = await this.jiraService.getTaskMissingTimeTracking(team.boardId);
+            this.logger.debug('tasks: ', tasks.length);
+            if (tasks && tasks.length > 0) {
+                await this.notificationService.sendNotifyMissingTime(team, tasks);
+            }
+        } catch (err) {
+            this.logger.error(`Error in TimeTrackingCronService for team ${team.boardId}: ${err.message}`);
+        }
+    }
+
     // Секунди Хвилини Години День Місяць День_тижня
     //@Cron("0 */1 08-19 * * 1-5")
     @Cron("0 0 10 * * 1-5")

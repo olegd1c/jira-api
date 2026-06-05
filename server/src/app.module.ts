@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
+import { CronController } from '@app/controllers/cron/cron.controller';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -53,7 +54,7 @@ import TasksModule from './controllers/task/task.module';
     TeamModule,
     TasksModule
   ],
-  controllers: [AppController],
+  controllers: [AppController, CronController],
   providers: [
     AppService,
     JiraService,

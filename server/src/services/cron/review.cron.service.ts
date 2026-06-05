@@ -27,4 +27,11 @@ export class ReviewCronService {
             this.logger.debug(error);
         });
     }
+
+    async handleCronForTeam(teamId: string) {
+        const team = await this.teamService.findOneForReview(teamId);
+        if (!team) return;
+        const tasks: Task[] = await this.jiraService.getTaskForReview(team.boardId);
+        await this.notificationService.sendNotifyTasks(team, tasks);
+    }
 }
