@@ -17,11 +17,11 @@ export class TimeTrackingCronService {
 
     async handleCronForTeam(teamId: string) {
         const team = await this.teamService.findOneForTimeTracking(teamId);
-        this.logger.debug('TimeTrackingCronService: ', team.name);
+        //this.logger.debug('TimeTrackingCronService: ', team.name);
         if (!team) return;
         try {
             const tasks: Task[] = await this.jiraService.getTaskMissingTimeTracking(team.boardId);
-            this.logger.debug('tasks: ', tasks.length);
+            //this.logger.debug('tasks: ', tasks.length);
             if (tasks && tasks.length > 0) {
                 await this.notificationService.sendNotifyMissingTime(team, tasks);
             }
