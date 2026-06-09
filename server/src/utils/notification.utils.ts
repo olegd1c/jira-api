@@ -2,6 +2,7 @@ import { Task } from '@shared_models/task.model';
 import { Meeting } from '@app/controllers/meeting/meeting.schema';
 import { User as UserMeeting } from '@app/controllers/user/user.schema';
 import { StatusUser } from "@shared_models/users.model";
+import { AnnouncementData, AnnouncementTask } from "@shared_models/announcement.model";
 
 export function parseReviewTasks(tasks: Task[], users: UserMeeting[]): Meeting[] {
     let title = 'Задача в ревью: ' + "\n";
@@ -88,7 +89,7 @@ export function prepareCardV2MissingTime(tasks: Task[], users: UserMeeting[]): a
                 }
             }
         });
-        
+
         widgets.push({ divider: {} });
     });
 
@@ -145,4 +146,170 @@ export function prepareMessage(item: Meeting): string {
     }
 
     return mess;
+}
+
+export function prepareCardV2ReviewTasks(tasks: Task[], users: UserMeeting[]): any {
+    const widgets: any[] = [];
+
+    if (!tasks || tasks.length === 0) {
+        return null;
+    }
+
+    tasks.forEach((item: Task) => {
+        let reviewersList: string[] = [];
+
+        item.reviewers.forEach((reviewer: string) => {
+            const fUser = users.find((u) => u.jiraLogin == reviewer);
+            let reviewerDisplay = reviewer;
+
+            if (fUser) {
+                reviewerDisplay = fUser.name;
+                const fReviewsConducted = item.reviews_conducted.filter((elem) => elem == reviewer);
+                if (fReviewsConducted.length == 0) {
+                    if (fUser.email) {
+                        reviewerDisplay += ` (<users/${fUser.email}>)`;
+                    }
+                } else {
+                    reviewerDisplay += ' ✅';
+                }
+            }
+            reviewersList.push(`👤 <b>${reviewerDisplay}</b>`);
+        });
+
+        widgets.push({
+            decoratedText: {
+                topLabel: item.key,
+                text: item.summary,
+                bottomLabel: reviewersList.join('<br>'),
+                wrapText: true,
+                startIcon: {
+                    knownIcon: "PERSON"
+                },
+                button: {
+                    text: "Jira",
+                    onClick: {
+                        openLink: {
+                            url: item.link
+                        }
+                    }
+                }
+            }
+        });
+
+        widgets.push({ divider: {} });
+    });
+
+    if (widgets.length > 0) {
+        widgets.pop(); // Видаляємо останній роздільник
+    }
+
+    return {
+        cardsV2: [
+            {
+                cardId: "reviewTasksCard",
+                card: {
+                    header: {
+                        title: "👀 Code Review Reminder",
+                        subtitle: "Задачі, які очікують на ревью",
+                        imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rate_review/default/24px.svg",
+                        imageType: "CIRCLE"
+                    },
+                    sections: [
+                        {
+                            widgets: widgets
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+}
+
+export function prepareCardV2Announcement(data: AnnouncementData, user: any): any {
+    const widgets: any[] = [];
+    let dateStr = '';
+
+    if (data.date) {
+        const d = new Date(data.date);
+
+        if (!isNaN(d.getTime())) {
+            dateStr = d.toLocaleString('sv-SE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).replace('T', ' '); // sv-SE дає формат YYYY-MM-DD
+        } else {
+            dateStr = '';
+        }
+    }
+
+    widgets.push({
+        decoratedText: {
+            text: `<b>Дата та час:</b> ${dateStr}`,
+            startIcon: { knownIcon: "CLOCK" }
+        }
+    });
+    widgets.push({
+        decoratedText: {
+            text: `<b>Відповідальний:</b> ${data.executor}`,
+            startIcon: { knownIcon: "PERSON" }
+        }
+    });
+
+    widgets.push({ divider: {} });
+
+    if (data.tasks && data.tasks.length > 0) {
+        data.tasks.forEach((item: AnnouncementTask) => {
+            let taskInfo = `<b>Виконавець:</b> ${item.devName}<br><b>Тестувальник:</b> ${item.testName}<br><b>Підтвердження бізнесу:</b> ${item.confirm}`;
+            if (item.info) {
+                taskInfo = `${item.info}<br>${taskInfo}`;
+            }
+
+            widgets.push({
+                decoratedText: {
+                    topLabel: item.key,
+                    text: item.summary,
+                    bottomLabel: taskInfo,
+                    wrapText: true,
+                    startIcon: { knownIcon: "TICKET" },
+                    button: {
+                        text: "Jira",
+                        onClick: {
+                            openLink: { url: item.link }
+                        }
+                    }
+                }
+            });
+            widgets.push({ divider: {} });
+        });
+    }
+
+    widgets.push({
+        decoratedText: {
+            text: `Автор повідомлення: ${user?.displayName || user?.name || ''}`,
+            startIcon: { knownIcon: "PERSON" }
+        }
+    });
+
+    return {
+        cardsV2: [
+            {
+                cardId: "announcementCard",
+                card: {
+                    header: {
+                        title: "🚀 Запланований деплой",
+                        imageUrl: "https://fonts.gstatic.com/s/i/short_term/release/googlestars/rocket/default/24px.svg",
+                        imageType: "CIRCLE"
+                    },
+                    sections: [
+                        {
+                            widgets: widgets
+                        }
+                    ]
+                }
+            }
+        ]
+    };
 }

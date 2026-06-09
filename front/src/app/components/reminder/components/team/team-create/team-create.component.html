@@ -65,27 +65,50 @@
                     <div *ngIf="f.team.errors.required">Cтатус обов"язковий</div>
                   </div>
                 </div>
-                <div class=" form-check">
-                  <input type="checkbox" formControlName="checkReview"
-                         class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkReview.errors }" />
-                  <label class="form-check-label" for="checkReview">Запуск крона перевірки ревью</label>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="form-check me-3">
+                    <input type="checkbox" formControlName="isReviewCheckEnabled"
+                           class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.isReviewCheckEnabled.errors }" />
+                    <label class="form-check-label" for="isReviewCheckEnabled">Запуск крона перевірки ревью</label>
+                  </div>
+                  <button *ngIf="itemId" type="button" class="btn btn-sm btn-outline-secondary ms-2" (click)="runCron('review')" [disabled]="cronRunning['review']">
+                    <span *ngIf="cronRunning['review']" class="spinner-border spinner-border-sm me-1"></span>
+                    Запустити
+                  </button>
                 </div>
-                <div class=" form-check">
-                  <input type="checkbox" formControlName="checkMeeting"
-                         class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.checkMeeting.errors }" />
-                  <label class="form-check-label" for="checkMeeting">Запуск крона перевірки зустрічей</label>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="form-check me-3">
+                    <input type="checkbox" formControlName="isTimeTrackingCheckEnabled"
+                           class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.isTimeTrackingCheckEnabled.errors }" />
+                    <label class="form-check-label" for="isTimeTrackingCheckEnabled">Запуск крона перевірки таймінгу</label>
+                  </div>
+                  <button *ngIf="itemId" type="button" class="btn btn-sm btn-outline-secondary ms-2" (click)="runCron('timetracking')" [disabled]="cronRunning['timetracking']">
+                    <span *ngIf="cronRunning['timetracking']" class="spinner-border spinner-border-sm me-1"></span>
+                    Запустити
+                  </button>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                  <div class="form-check me-3">
+                    <input type="checkbox" formControlName="isMeetingCheckEnabled"
+                           class="form-check-input" [ngClass]="{ 'is-invalid': submitted && f.isMeetingCheckEnabled.errors }" />
+                    <label class="form-check-label" for="isMeetingCheckEnabled">Запуск крона перевірки зустрічей</label>
+                  </div>
+                  <button *ngIf="itemId" type="button" class="btn btn-sm btn-outline-secondary ms-2" (click)="runCron('meeting')" [disabled]="cronRunning['meeting']">
+                    <span *ngIf="cronRunning['meeting']" class="spinner-border spinner-border-sm me-1"></span>
+                    Запустити
+                  </button>
                 </div>
 
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                  <div class="btn-group mr-2" role="group" aria-label="First group">
+                  <div class="btn-group me-2" role="group" aria-label="First group">
                     <button [disabled]="submitted" type="submit" class="btn btn-primary">
-                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm me-1"></span>
                       Записати
                     </button>
                   </div>
-                  <div class="btn-group mr-2" role="group" aria-label="Second group">
+                  <div class="btn-group me-2" role="group" aria-label="Second group">
                     <button (click)="Cancel()" class="btn btn-primary">
-                      <span *ngIf="submitted" class="spinner-border spinner-border-sm mr-1"></span>
+                      <span *ngIf="submitted" class="spinner-border spinner-border-sm me-1"></span>
                       Відмінити
                     </button>
                   </div>

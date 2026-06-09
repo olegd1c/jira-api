@@ -15,6 +15,7 @@ export class TeamCreateComponent implements OnInit {
   loading = false;
   dataForm: FormGroup;
   submitted = false;
+  cronRunning: { [key: string]: boolean } = {};
 
   itemId;
   url = '/main/reminder/teams';
@@ -50,8 +51,9 @@ export class TeamCreateComponent implements OnInit {
       chat_url: [''],
       review_url: [''],
       boardId: [''],
-      checkReview: [false],
-      checkMeeting: [false],
+      isReviewCheckEnabled: [false],
+      isTimeTrackingCheckEnabled: [false],
+      isMeetingCheckEnabled: [false],
       status: [''],
     });
   }
@@ -80,6 +82,13 @@ export class TeamCreateComponent implements OnInit {
 
   Cancel(){
     this.router.navigate([this.url]);
+  }
+
+  runCron(type: string) {
+    this.cronRunning[type] = true;
+    this.service.runCron(this.itemId, type).finally(() => {
+      this.cronRunning[type] = false;
+    });
   }
 
 }

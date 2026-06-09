@@ -27,10 +27,13 @@ export class Team {
   boardId: number;
 
   @Prop()
-  checkReview: boolean;
+  isReviewCheckEnabled: boolean;
 
   @Prop()
-  checkMeeting: boolean;
+  isTimeTrackingCheckEnabled: boolean;
+
+  @Prop()
+  isMeetingCheckEnabled: boolean;
 
   @Prop()
   status: StatusTeam;

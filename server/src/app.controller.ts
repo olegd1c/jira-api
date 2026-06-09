@@ -6,6 +6,7 @@ import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 import { TelegramBotService } from './services/telegram-bot.service';
 import { NotificationService } from './services/notification.service';
 import { Permissions } from './shared/models/permission.enum';
+import { AnnouncementPayload } from './shared/models/announcement.model';
 
 export const MetaPermissions = (...permissions: string[]) => SetMetadata('permissions', permissions);
 
@@ -71,7 +72,7 @@ export class AppController {
   @Post('send-announcement')
   @SetMetadata('permissions', [Permissions.notify])
   sendAnnouncement(
-    @Body() data: any,
+    @Body() data: AnnouncementPayload,
     @GetUser() user: User,
   ): Promise<any> {
     return this.notificationService.sendAnnouncementMessage(data, user);

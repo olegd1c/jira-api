@@ -71,8 +71,9 @@ export class JiraService {
                 });
             }
 
-            const actualTimeDev_raw = issue.fields[FieldTask.actualTimeDev];
-            const actualTimeDev = actualTimeDev_raw ? +actualTimeDev_raw : 0;
+            // Час виконання беремо з журналу робіт (timespent в секундах, переводимо в години)
+            const timespent = issue.fields.timespent;
+            const actualTimeDev = timespent ? +(timespent / 3600).toFixed(2) : 0;
 
             return {
                 devName, pointDev, testName, pointTest,
@@ -366,9 +367,32 @@ export class JiraService {
 
         try {
             return await jiraApi.getCurrentUser();
-            //this.logger.log(`Успішне підключення до Jira: ${currentUser.displayName || currentUser.name}`);
         } catch (err) {
-            this.logger.error(`Помилка авторизації Jira: ${err.message}`);
+            const statusCode = err.statusCode ? ` (Статус: ${err.statusCode})` : '';
+            const userContext = user.username ? ` для користувача: ${user.username}` : '';
+            
+            this.logger.error(`Помилка авторизації Jira${userContext}${statusCode}: ${err.message}`);
+            
+            if (err.error) {
+                let errorDetails = typeof err.error === 'object' ? JSON.stringify(err.error) : String(err.error);
+                
+                // Очищення HTML-відповіді, щоб не засмічувати логи
+                if (errorDetails.includes('<html') || errorDetails.includes('<body')) {
+                    const authMatch = errorDetails.match(/(Basic Authentication Failure[^<]*)/i);
+                    const h1Match = errorDetails.match(/<h1>(.*?)<\/h1>/i);
+                    
+                    if (authMatch) {
+                        errorDetails = authMatch[1].trim();
+                    } else if (h1Match) {
+                        errorDetails = h1Match[1].trim();
+                    } else {
+                        errorDetails = 'HTML-відповідь з помилкою (ймовірно, невірні облікові дані або вимагається CAPTCHA)';
+                    }
+                }
+                
+                this.logger.error(`Деталі помилки Jira: ${errorDetails}`);
+            }
+            
             throw err;
         }
     }

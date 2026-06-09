@@ -27,6 +27,10 @@ class MeetingService {
     ;
   }
 
+  async findActiveByTeam(teamId: string): Promise<MeetingDocument[]> {
+    return this.meetingModel.find({ team: teamId, status: StatusMeeting.active }).populate('team').populate('users');
+  }
+
   async findOne(id: string) {
     const post = await this.meetingModel.findById(id);
     if (!post) {

@@ -27,13 +27,17 @@ export class PostDto {
 
     @IsOptional()
     @IsBoolean()
-    checkReview?: boolean;
+    isReviewCheckEnabled?: boolean = false;
 
     @IsOptional()
     @IsBoolean()
-    checkMeeting?: boolean;
+    isTimeTrackingCheckEnabled?: boolean = false;
 
-    @IsNotEmpty()
+    @IsOptional()
+    @IsBoolean()
+    isMeetingCheckEnabled?: boolean = false;
+
+    @IsOptional()
     @IsString()
-    status: StatusTeam;
+    status?: StatusTeam = StatusTeam.blocked;
 }

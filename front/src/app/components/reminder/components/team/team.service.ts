@@ -36,4 +36,9 @@ export class TeamService extends BaseService {
     this.service.setUrl(`${this.url}/${id}`);
     return this.service._delete();
   }
+
+  public runCron(teamId: string, type: string): Promise<any> {
+    this.service.setUrl(`crons/${teamId}/${type}`);
+    return this.service._post();
+  }
 }

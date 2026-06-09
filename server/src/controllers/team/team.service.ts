@@ -13,6 +13,29 @@ class TeamService implements OnModuleInit {
 
   async onModuleInit() {
     await this.migrateWebHookField();
+    await this.migrateCheckFields();
+  }
+
+  async migrateCheckFields() {
+    try {
+      const docsToMigrate = await this.model.countDocuments({ checkReview: { $exists: true } });
+      if (docsToMigrate > 0) {
+        this.logger.log(`Found ${docsToMigrate} teams with old check fields. Migrating to is*CheckEnabled...`);
+        await this.model.updateMany(
+          { checkReview: { $exists: true } },
+          { $rename: { 
+              'checkReview': 'isReviewCheckEnabled',
+              'checkTimeTracking': 'isTimeTrackingCheckEnabled',
+              'checkMeeting': 'isMeetingCheckEnabled'
+            } 
+          },
+          { strict: false }
+        );
+        this.logger.log('Database migration (checkFields -> is*CheckEnabled) completed successfully.');
+      }
+    } catch (err) {
+      this.logger.error(`Migration check fields failed: ${err.message}`);
+    }
   }
 
   async migrateWebHookField() {
@@ -49,11 +72,25 @@ class TeamService implements OnModuleInit {
   }
 
   create(postData: PostDto) {
+    if (!postData.status) {
+      postData.status = StatusTeam.blocked;
+    }
+    postData.isReviewCheckEnabled = postData.isReviewCheckEnabled ?? false;
+    postData.isTimeTrackingCheckEnabled = postData.isTimeTrackingCheckEnabled ?? false;
+    postData.isMeetingCheckEnabled = postData.isMeetingCheckEnabled ?? false;
+    
     const createdPost = new this.model(postData);
     return createdPost.save();
   }
 
   async update(id: string, postData: PostDto) {
+    if (!postData.status) {
+      postData.status = StatusTeam.blocked;
+    }
+    postData.isReviewCheckEnabled = postData.isReviewCheckEnabled ?? false;
+    postData.isTimeTrackingCheckEnabled = postData.isTimeTrackingCheckEnabled ?? false;
+    postData.isMeetingCheckEnabled = postData.isMeetingCheckEnabled ?? false;
+
     const post = await this.model
       .findByIdAndUpdate(id, postData)
       .setOptions({ overwrite: true, new: true });
@@ -78,11 +115,19 @@ class TeamService implements OnModuleInit {
   }
 
   async findForReview(): Promise<TeamDocument[]> {
-    return this.model.find({ checkReview: true, status: StatusTeam.active, reviewChatId: { $ne: null } }).populate('users');
+    return this.model.find({ isReviewCheckEnabled: true, status: StatusTeam.active, reviewChatId: { $ne: null } }).populate('users');
   }
 
   async findForTimeTracking(): Promise<TeamDocument[]> {
-    return this.model.find({ checkReview: true, status: StatusTeam.active }).populate('users');
+    return this.model.find({ isTimeTrackingCheckEnabled: true, status: StatusTeam.active }).populate('users');
+  }
+
+  async findOneForReview(id: string): Promise<TeamDocument | null> {
+    return this.model.findOne({ _id: id, isReviewCheckEnabled: true, status: StatusTeam.active }).populate('users');
+  }
+
+  async findOneForTimeTracking(id: string): Promise<TeamDocument | null> {
+    return this.model.findOne({ _id: id, isTimeTrackingCheckEnabled: true, status: StatusTeam.active }).populate('users');
   }
 
 }
