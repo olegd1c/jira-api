@@ -30,8 +30,10 @@ export class ReviewCronService {
 
     async handleCronForTeam(teamId: string) {
         const team = await this.teamService.findOneForReview(teamId);
+        //this.logger.debug('ReviewCronService: ', team?.name);
         if (!team) return;
         const tasks: Task[] = await this.jiraService.getTaskForReview(team.boardId);
+        //this.logger.debug('tasks: ', tasks.length);
         await this.notificationService.sendNotifyTasks(team, tasks);
     }
 }

@@ -123,7 +123,7 @@ class TeamService implements OnModuleInit {
   }
 
   async findOneForReview(id: string): Promise<TeamDocument | null> {
-    return this.model.findOne({ _id: id, isReviewCheckEnabled: true, status: StatusTeam.active, reviewChatId: { $ne: null } }).populate('users');
+    return this.model.findOne({ _id: id, isReviewCheckEnabled: true, status: StatusTeam.active }).populate('users');
   }
 
   async findOneForTimeTracking(id: string): Promise<TeamDocument | null> {
